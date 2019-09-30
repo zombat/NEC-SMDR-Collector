@@ -23,10 +23,66 @@ var		bufferArray = [];
 		continueInterval = true;
 		reconnectClient = false;
 
+const checkDirectories = () => {
+	try {
+		if (fs.existsSync(`./Logs`)) {
+		} else {
+			fs.mkdir(`./Logs`, function(err, response){
+				if(err){
+					console.log(err);
+				} else {
+					console.log(`Created Directory: ./Logs`);
+					if(process.env.VERBOSE_LOG){
+						logFile(theDate(`dateTime`) + `\t:\tCreated Directory: ./Logs`, theDate(`date`) + `.log`);
+					}	
+				}
+			});
+		}
+	} catch(err) {
+		console.err(err)
+	}
+}
+
 const logFile = (message, fileName) => {
 	fs.appendFile(`./Logs/` + fileName, message + `\n`, `utf8`, (err) => {
 	});
 };
+
+
+if(process.env.GET_FILES){
+		// Collect files from directory
+	if(process.argv.indexOf(`--smdrfile`) != -1){
+		if(process.argv.indexOf(`--pathname`) != -1 && typeof process.argv[process.argv.indexOf(`--pathname`)+1] == `string`){
+			smdrPath = path.join(__dirname, process.argv[process.argv.indexOf(`--pathname`)+1]);
+		} else {
+			smdrPath = path.join(__dirname, `SMDR_Data`);
+		}
+		// Check if path exists
+		try {
+			if (fs.existsSync(smdrPath)) {
+				console.log(smdrPath);
+			} else {
+				if(process.argv.indexOf(`--forcedir`) != -1){
+					fs.mkdir(smdrPath, function(err, response){
+						if(err){
+							console.log(err);
+						} else {
+							console.log(`Created Directory: ` + smdrPath);
+						}
+					});
+				} else {
+					console.log(`Path does not exist.`);
+					console.log(`Create directory or use the --forcedir flag.`);
+				}	
+			}
+			getFiles();
+			setInterval(getFiles,intervalTimer);
+		} catch(err) {
+			console.err(err)
+		}		
+	}
+}
+
 
 const theDate = (returnType) => {
 	var dateFnc = new Date();
@@ -172,6 +228,12 @@ client.on(`data`, (data) => {
 					logFile(smdrRecord, theDate(`date`) + `.smdr`);
 					necSMDR.parseSMDR(smdrRecord, (smdrObject) => {
 						dbFunctions.insertSMDRRecord(smdrObject, (response) => {
+							if(process.env.VERBOSE_CONSOLE ===`true`){
+								console.log(`\t=>\tDatabase Response:\t` + JSON.stringify(response));
+								}
+							if(process.env.VERBOSE_LOG){
+								logFile(theDate(`dateTime`) + `\t:\t=>\tDatabase Response:\t` + JSON.stringify(response), theDate(`date`) + `.log`);
+							}
 						});
 					});
 				});
@@ -306,3 +368,5 @@ if(process.env.GET_FILES){
 if(process.env.GET_NEAX){
 reconnectClient = true;
 }
+
+checkDirectories();
