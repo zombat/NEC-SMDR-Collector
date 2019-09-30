@@ -11,7 +11,14 @@ const	assert = require(`assert`),
 		mongoClient(function(err, client){
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).insertOne( smdrRecord, (err, response) => {
 				//assert.equal(null, err);
-				callback(response.result);			
+				if(err){
+					
+				}
+				if(response == null) {
+					callback(`Not inserted`);
+				} else {
+					callback(response.result);		
+				}		
 			});
 		});
 	},

@@ -49,85 +49,65 @@ const logFile = (message, fileName) => {
 };
 
 
-if(process.env.GET_FILES){
-		// Collect files from directory
-	if(process.argv.indexOf(`--smdrfile`) != -1){
-		if(process.argv.indexOf(`--pathname`) != -1 && typeof process.argv[process.argv.indexOf(`--pathname`)+1] == `string`){
-			smdrPath = path.join(__dirname, process.argv[process.argv.indexOf(`--pathname`)+1]);
-		} else {
-			smdrPath = path.join(__dirname, `SMDR_Data`);
-		}
-		// Check if path exists
-		try {
-			if (fs.existsSync(smdrPath)) {
-				console.log(smdrPath);
-			} else {
-				if(process.argv.indexOf(`--forcedir`) != -1){
-					fs.mkdir(smdrPath, function(err, response){
-						if(err){
-							console.log(err);
-						} else {
-							console.log(`Created Directory: ` + smdrPath);
-						}
-					});
-				} else {
-					console.log(`Path does not exist.`);
-					console.log(`Create directory or use the --forcedir flag.`);
-				}	
-			}
-			getFiles();
-			setInterval(getFiles,intervalTimer);
-		} catch(err) {
-			console.err(err)
-		}		
+const logMessage = (direction, message, data, fileName) => {
+	if(direction == `in`){
+		direction = `=>`;
+	} else if(direction == `out`){
+		direction = `<=`;
+	} else if(direction == `equal`){
+		direction = `--`;
+	}
+	var theMessage = `\t` + direction + `\t` + message + `:\t` + data;
+	if(process.env.VERBOSE_CONSOLE ===`true`){
+		console.log(theMessage);
+	}
+	if(process.env.VERBOSE_LOG){
+		logFile(theDate(`dateTime`) + `\t:` + theMessage, theDate(`date`) + `.log`);
+	}
+};
+
+const padZero = (input) => {
+	if(input < 10){
+		input = `0` + input;
+		return(input);
+	} else {
+		return(input);
 	}
 }
-
 
 const theDate = (returnType) => {
 	var dateFnc = new Date();
 	var date = dateFnc.getFullYear() + `-` + (dateFnc.getMonth() + 1) + `-` + dateFnc.getDate();
-	var seconds = dateFnc.getSeconds();
-	if(seconds < 10){
-		seconds = `0` + seconds;		
-	}
-	var time = dateFnc.getHours() + `:` + dateFnc.getMinutes() + `:` + seconds;
+	var time = dateFnc.getHours() + `:` + padZero(dateFnc.getMinutes()) + `:` + padZero(dateFnc.getSeconds());
 	var dateTime = date + ` - ` + time;
 	if(returnType == `date`){
 		return date;
 	} else if(returnType == `dateTime`){
-		
 	return dateTime;
 	}
 };
 		
 if(process.env.GET_FILES ===`true` && process.env.GET_NEAX ===`true`){
-	console.log(`\n -- Configuration Error:`);
-	console.log(`\t Both GET_FILES and GET_NEAX cannot be true.`);
-	console.log(`\t Check .env file.`);
-	if(process.env.VERBOSE_LOG){
-		logFile(theDate(`dateTime`), theDate(`date`) + `.log`);
-		logFile(`\t -- Configuration Error:`, theDate(`date`) + `.log`);
-		logFile(`\t Both GET_FILES and GET_NEAX cannot be true.`, theDate(`date`) + `.log`);
-		logFile(`\t Check .env file.`, theDate(`date`) + `.log`);
-	}
-	return 1;
+	logMessage(`other`, `Configuration Error`, `Both GET_FILES and GET_NEAX cannot be true`);
 }		
 		
 const getFiles = () => {
 	// ` list of smdr files in directory
-	fs.readdir(smdrPath, (err, files) => {
+	fs.readdir(`./Logs`, (err, files) => {
 		let smdrFiles = files.filter((file) => {
 			return path.extname(file).toLowerCase() == `.smdr`
 		});
 		if(smdrFiles.length){
-			console.log(smdrFiles);
 			smdrFiles.forEach((file) => {
 				parseFile(file, (data) => {
-					console.log(file);
+					logMessage(`in`, `File Name`, file);
 					data.forEach((smdrEntry) => {
-						necSMDR.parseSMDR(smdrEntry, (result) => {
-							//console.log(result);
+						necSMDR.parseSMDR(smdrEntry, (response) => {
+							dbFunctions.insertSMDRRecord(response, (response) => {
+								logMessage(`other`, `SMDR String`, smdrEntry);
+								logMessage(`in`, `Database Response`, JSON.stringify(response));
+							});
+							
 						});
 					});
 				});
@@ -140,9 +120,9 @@ const getFiles = () => {
 
 const parseFile = (fileName, callback) => {
 	// Convert to array of strings, drop empty elements, and return.
-	fs.readFile(smdrPath + `/` + fileName, (err, data) => {
+	fs.readFile(`./Logs` + `/` + fileName, (err, data) => {
 		if (err) throw err;
-		let fileData = data.toString().split(``);
+		let fileData = data.toString().split(`\n`);
 		for(var i=0; i<fileData.length;i++){
 			if(!fileData[i].length){
 				fileData.splice(i,1)
@@ -158,32 +138,19 @@ client.on(`error`, (err) => {
         console.log(`Connection timed out.`);
         client.exit;
     }
-    console.log(`Error:`);
-    console.log(err);
-    console.log();
-	if(process.env.VERBOSE_LOG){
-		logFile(theDate(`dateTime`) + `\t:\t--\tClient Error:\t` + err, theDate(`date`) + `.log`);
-	}
+	logMessage(`equal`, `Client`, `Client Error`, err);
 });
 
 client.on(`ready`, () => {
 	console.log(`Client connected`);
 	reconnectClient = false;
-	if(process.env.VERBOSE_LOG){
-		logFile(theDate(`dateTime`) + `\t:\t--\tClient connected`, theDate(`date`) + `.log`);
-	}
+	logMessage(`equal`, `Client`, `Client connected`);
 });
 
 client.on(`data`, (data) => {
 	// Check to see if proper connection is made.
 	if (data.toString().substring(1, 2) === `2`) {
-		if(process.env.VERBOSE_CONSOLE ===`true`){
-			console.log(`\t=>\tSMDR Data:\t` + data);
-		}
-		if(process.env.VERBOSE_LOG){
-			logFile(theDate(`dateTime`) + `\t:\t=>\tSMDR Data:\t` + data, theDate(`date`) + `.log`);
-		}
-		
+		logMessage(`in`, `SMDR Data`, data);
 		var hexData = data.toString(`hex`);
 		var cdrData = []; 
 		var smdrObject = {
@@ -199,24 +166,6 @@ client.on(`data`, (data) => {
 			'ParityByte': hexData.substring(hexData.length-2,hexData.length)
 		};
 		
-		if(process.env.VERBOSE_CONSOLE ===`true`){
-			//console.log(`Expected Lenght: ` + smdrObject.LengthDec);
-			//console.log(`SMDR Record: ` + smdrObject.Record);
-			//console.log(`Record Length: ` + smdrObject.Record.length);
-			//console.log(`Sequence Number: `  + smdrObject.SequenceNumber);
-			//console.log(`Identifier Kind: ` + smdrObject.IdentifierKind);
-			//console.log(`Device Number: ` + smdrObject.DeviceNumber);
-		}
-		if(process.env.VERBOSE_LOG){
-			//logFile(theDate(`dateTime`), theDate(`date`) + `.log`);
-			//console.log(`\t Expected Lenght: ` + smdrObject.LengthDec);
-			//console.log(`\t SMDR Record: ` + smdrObject.Record);
-			//console.log(`\t Record Length: ` + smdrObject.Record.length);
-			//console.log(`\t Sequence Number: `  + smdrObject.SequenceNumber);
-			//console.log(`\t Identifier Kind: ` + smdrObject.IdentifierKind);
-			//console.log(`\t Device Number: ` + smdrObject.DeviceNumber);
-		}
-		
 		cdrData.push(smdrObject);
 		cdrData.forEach(function(record){
 			if(data.toString().substring(1, 2) ===  `2`){
@@ -228,52 +177,26 @@ client.on(`data`, (data) => {
 					logFile(smdrRecord, theDate(`date`) + `.smdr`);
 					necSMDR.parseSMDR(smdrRecord, (smdrObject) => {
 						dbFunctions.insertSMDRRecord(smdrObject, (response) => {
-							if(process.env.VERBOSE_CONSOLE ===`true`){
-								console.log(`\t=>\tDatabase Response:\t` + JSON.stringify(response));
-								}
-							if(process.env.VERBOSE_LOG){
-								logFile(theDate(`dateTime`) + `\t:\t=>\tDatabase Response:\t` + JSON.stringify(response), theDate(`date`) + `.log`);
-							}
+							logMessage(`in`, `Database Response`, JSON.stringify(response));
 						});
 					});
 				});
 			}
 			necPBX.respondSMDR(client, `4`, smdrObject.DeviceNumber, smdrObject.SequenceNumber, (responseBuffer) => {
-				if(process.env.VERBOSE_CONSOLE ===`true`){
-					console.log(`\t<=\tResponse:\t` + responseBuffer);
-				}
-				if(process.env.VERBOSE_LOG ===`true`){
-					logFile(theDate(`dateTime`) + `\t:\t<=\tResponse:\t` + responseBuffer, theDate(`date`) + `.log`);
-				}
-				
+				logMessage(`out`, `Response`, responseBuffer);				
 			});
 		});
 	} else if (data.toString().substring(1, 2) === `3`) {
 		if (data.toString().length > 25) {
-			if(process.env.VERBOSE_CONSOLE ===`true`){
-				console.log(`\t=>\tSMDR Data:\t` + data);
-			}
-			if(process.env.VERBOSE_LOG){
-				logFile(theDate(`dateTime`) + `\t:\t=>\tSMDR Data:\t` + data, theDate(`date`) + `.log`);
-			}
+			logMessage(`in`, `SMDR Data`, data);
 		} else {
 			switch(data.toString().substring(9, 10)) {
 				case `1`:
-					if(process.env.VERBOSE_CONSOLE ===`true`){
-						console.log(`\t=>\tBuffer Empty:\t` + data);
-					}
-					if(process.env.VERBOSE_LOG){
-						logFile(theDate(`dateTime`) + `\t:\t=>\tBuffer Empty:\t` + data, theDate(`date`) + `.log`);
-					}
+					logMessage(`in`, `Buffer Empty`, data);	
 					bufferArray = [];
 					break;
 				case `2`:
-					if(process.env.VERBOSE_CONSOLE ===`true`){
-						console.log(`\t=>\tNormal:\t` + data);
-					}
-					if(process.env.VERBOSE_LOG){
-						logFile(theDate(`dateTime`) + `\t:\t=>\tNormal:\t` + data, theDate(`date`) + `.log`);
-					}
+					logMessage(`in`, `Normal`, data);	
 					break;
 				default:
 					break;
@@ -281,12 +204,7 @@ client.on(`data`, (data) => {
 		}
 		
 	} else {
-		if(process.env.VERBOSE_CONSOLE ===`true`){
-			console.log(`\t=>\tUndefined Data:` + data);
-		}
-		if(process.env.VERBOSE_LOG){
-			logFile(theDate(`dateTime`) + `\t:\t=>\tUndefined Data:` + dat, theDate(`date`) + `.log`);
-		}
+		logMessage(`in`, `Undefined Data`, data);	
 	}
 });
 
@@ -294,76 +212,32 @@ client.on(`close`, () => {
 	// Listen for connection close and destroy the connection.
 	client.destroy();
 	reconnectClient = true;
-	console.log(`tClient connection closed`);
-	if(process.env.VERBOSE_LOG){
-		logFile(theDate(`dateTime`) + `\t: \t--\tClient connection closed`, theDate(`date`) + `.log`);
-	}
+	console.log(`Client connection closed`);
+	logMessage(`equal`, `Client`, `Client connection closed`);
 });
 
 var intervalRequest = setInterval( () => {
-	if(reconnectClient){
-		necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
-			
-		});
-	} else if(!continueInterval){
-		clearInterval(intervalRequest);
-	} else if(sendSMDRRequest){
-		necPBX.sendSMDRRequest(smdrConnection, client, (smdrRequestBuffer) => {
-			if(process.env.VERBOSE_CONSOLE ===`true`){
-				console.log(`\t<=\tSMDR Request:\t` + smdrRequestBuffer);
-			}
-			if(process.env.VERBOSE_LOG){
-				logFile(theDate(`dateTime`) + `\t:\t<=\tSMDR Request:\t` + smdrRequestBuffer, theDate(`date`) + `.log`);
-			}
-		});
-	} else{
-		necPBX.sendStatusMonitor(smdrConnection, client, (statusMonitorBuffer) => {
-			if(process.env.VERBOSE_CONSOLE ===`true`){
-				console.log(`\t<=\tStatus Monitor:\t` + statusMonitorBuffer);
-			}
-			if(process.env.VERBOSE_LOG){
-				logFile(theDate(`dateTime`) + `\t:\t<=\tStatus Monitor:\t` +  statusMonitorBuffer, theDate(`date`) + `.log`);
-			}
-		});
-		sendSMDRRequest = true;
+	if(process.env.GET_FILES == `true`){
+		getFiles();
+		 clearInterval(intervalRequest);
+	} else if(process.env.GET_NEAX == `true`){
+		if(reconnectClient){
+			necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
+			});
+		} else if(!continueInterval){
+			clearInterval(intervalRequest);
+		} else if(sendSMDRRequest){
+			necPBX.sendSMDRRequest(smdrConnection, client, (smdrRequestBuffer) => {
+				logMessage(`in`, `SMDR Request`, smdrRequestBuffer);
+			});
+		} else{
+			necPBX.sendStatusMonitor(smdrConnection, client, (statusMonitorBuffer) => {
+				logMessage(`in`, `Status Monitor`, statusMonitorBuffer);
+			});
+			sendSMDRRequest = true;
+		}
 	}
 }, intervalTimer);
-
-
-
-if(process.env.GET_FILES){
-		// Collect files from directory
-	if(process.argv.indexOf(`--smdrfile`) != -1){
-		if(process.argv.indexOf(`--pathname`) != -1 && typeof process.argv[process.argv.indexOf(`--pathname`)+1] == `string`){
-			smdrPath = path.join(__dirname, process.argv[process.argv.indexOf(`--pathname`)+1]);
-		} else {
-			smdrPath = path.join(__dirname, `SMDR_Data`);
-		}
-		// Check if path exists
-		try {
-			if (fs.existsSync(smdrPath)) {
-				console.log(smdrPath);
-			} else {
-				if(process.argv.indexOf(`--forcedir`) != -1){
-					fs.mkdir(smdrPath, function(err, response){
-						if(err){
-							console.log(err);
-						} else {
-							console.log(`Created Directory: ` + smdrPath);
-						}
-					});
-				} else {
-					console.log(`Path does not exist.`);
-					console.log(`Create directory or use the --forcedir flag.`);
-				}	
-			}
-			getFiles();
-			setInterval(getFiles,intervalTimer);
-		} catch(err) {
-			console.err(err)
-		}		
-	}
-}
 
 if(process.env.GET_NEAX){
 reconnectClient = true;
