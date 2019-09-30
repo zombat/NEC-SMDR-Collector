@@ -1,0 +1,34 @@
+{
+  "name": "nec-smdr-collector",
+  "version": "1.0.0",
+  "description": "Node.js based SMDR collector for NEAX formatted SMDR that uploads data to MongoDB.",
+  "main": "SMDR_Collector-Server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node SMDR_Collector-Server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zombat/NEC-SMDR-Collector.git"
+  },
+  "keywords": [
+    "NEC",
+    "SMDR",
+    "NEAX2400",
+    "SV8500",
+    "SV9500"
+  ],
+  "author": "Raymond Andrew Rizzo",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/zombat/NEC-SMDR-Collector/issues"
+  },
+  "homepage": "https://github.com/zombat/NEC-SMDR-Collector#readme",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "buffer": "^5.4.3",
+    "dotenv": "^8.1.0",
+    "mongodb": "^3.3.2",
+    "nodemailer": "^6.3.0"
+  }
+}
