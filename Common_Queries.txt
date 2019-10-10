@@ -1,0 +1,21 @@
+Short Calls (Less than or equal to 30 seconds):
+	{ 'CallTime.Duration.Milliseconds' : { $lte : 30000 } }
+	
+Long Calls (Greater than or equal to 3 hours):
+	{ 'CallTime.Duration.Milliseconds' : { $gte : 3*60*1000 } }
+
+Calls from specific station (Non-FCCS):	
+	{ 'CallingPartyInformation.PhysicalNumber.CallingNumber' : '20000' }
+	
+Calls from specific station (FCCS):	
+	{ 'CallingPartyInformation.TelephoneNumber.LogicalNumber' : '20000' }	
+	
+Calls to specific station (Non-FCCS):	
+	{ 'CalledPartyInformation.PhysicalNumber.CallingNumber' : '20000' }
+	
+Calls to specific station (FCCS):	
+	{ 'CalledPartyInformation.TelephoneNumber.LogicalNumber' : '20000' }	
+
+All station calls from specific FPC:
+	{ $or: [{ 'CallingPartyInformation.TelephoneNumber.LogicalNumber': { $exists : true } }, { 'CallingPartyInformation.TelephoneNumber.FusionPointCode' : `001` } ] }
+

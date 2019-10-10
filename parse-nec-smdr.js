@@ -2,6 +2,9 @@
 	Module to parse SMDR messages.
 */
 
+var index186bit7 = true;
+var index241bit4 = false;
+
  module.exports = {
 	 
 	parseSMDR:(rawSMDR, callback) => {
@@ -47,6 +50,23 @@
 				}					
 		};
 		switch(rawSMDR.substring(3,5)) {
+				case `KA`:
+					smdrObject.RecordType = `Outgoing Normal Format`;
+					module.exports.parseKA(smdrObject, (smdrObject) => {
+						callback(smdrObject);
+					});
+					break;
+				case `KB`:
+					smdrObject.RecordType = `Station-to-Station Normal Format`;
+					module.exports.parseKB(smdrObject, (smdrObject) => {
+						callback(smdrObject);
+					});
+				case `KE`:
+					smdrObject.RecordType = `Incoming Normal Format`;
+					module.exports.parseKE(smdrObject, (smdrObject) => {
+						callback(smdrObject);
+					});
+					break;
 				case `KJ`:
 					smdrObject.RecordType = `Station-to-Station Extended Format`;
 					module.exports.parseKJ(smdrObject);
@@ -76,10 +96,308 @@
 					break;
 			}	
 	},
+	
+	parseKA (smdrObject) => {
+	/*
+		KA RECORD - OUTGOING NORMAL FORMAT
+		Untested
+	*/
+		smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber = smdrObject.RawSMDR.substring(5,8);
+		smdrObject.OutgoingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
+		if(smdrObject.RawSMDR.substring(12,14) != `  `){
+			var rds3000 = false;
+			// 1000 & 2000 (RDS) Feature Packages
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
+		} else {
+			var rds3000 = true;		
+		}
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/,``);
+		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
+		smdrObject.CallTime.Start.Month =  parseInt(smdrObject.RawSMDR.substring(20,22));
+		smdrObject.CallTime.Start.Day =  parseInt(smdrObject.RawSMDR.substring(22,24));
+		smdrObject.CallTime.Start.Hour =  parseInt(smdrObject.RawSMDR.substring(24,26));
+		smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.RawSMDR.substring(26,28));
+		smdrObject.CallTime.Start.Second =  parseInt(smdrObject.RawSMDR.substring(28,30));
+		smdrObject.CallTime.End.Year = parseInt(smdrObject.RawSMDR.substring(118,120));
+		smdrObject.CallTime.End.Month =  parseInt(smdrObject.RawSMDR.substring(30,32));
+		smdrObject.CallTime.End.Day =  parseInt(smdrObject.RawSMDR.substring(32,34));
+		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
+		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
+		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
+		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50));
+		if(rds3000){
+			// 3000 (RDS) Series Feature Package and higher.
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);
+		}
+		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
+		if(smdrObject.ConditionCodes.CodeOneCode == 0){
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+		} else {
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+		}
+		smdrObject.ConditionCodes.CodeTwoCode =  parseInt(smdrObject.RawSMDR.substring(54,55));
+		switch(rawSMDR.substring(54,55)) {
+			case 0:
+				smdrObject.ConditionCodes.CodeTwo = `Incoming, Outgoing, or Tandem call with neither Outgoing Trunk Queuing nor Account Codes used`;
+				break;
+			case 1:
+				smdrObject.ConditionCodes.CodeTwo = `Outgoing Trunk Queuing used, but not Account Codes`;
+				break;
+			case 2:
+				smdrObject.ConditionCodes.CodeTwo = `Account Codes used, but not Outgoing Trunk Queuing`;
+				break;
+			case 3:
+				smdrObject.ConditionCodes.CodeTwo = `Both Outgoing Trunk Queuing and Account Codes used`;
+				break;
+			default:
+				break;
+		}
+		smdrObject.ConditionCodes.CodeThreeCode =  parseInt(smdrObject.RawSMDR.substring(55,56));
+		switch(rawSMDR.substring(55,56)) {
+			case 0:
+				smdrObject.ConditionCodes.CodeTwo = `Regular Outgoing or Tandem call`;
+				break;
+			case 1:
+				smdrObject.ConditionCodes.CodeTwo = `Attendant Operator assisted call`;
+				break;
+			case 2:
+				smdrObject.ConditionCodes.CodeTwo = `The call Route Advanced (AOPR)`;
+				break;
+			case 3:
+				smdrObject.ConditionCodes.CodeTwo = `Attendant Operator assisted call that Route Advanced`;
+				break;
+			case 4:
+				smdrObject.ConditionCodes.CodeTwo = `Call routed to Least Cost Routing`;
+				break;
+			case 5:
+				smdrObject.ConditionCodes.CodeTwo = `Attendant Operator assisted call that is routed to Least Cost Routing`;
+				break;
+			default:
+				break;
+		}
+		if(smdrObject.ConditionCodes.CodeThreeCode > 1 && smdrObject.ConditionCodes.CodeThreeCode < 6){
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(56,59));
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(59,62));
+		} else {
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = false;
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = false;
+		}
+		smdrObject.DialCode.DialCode = smdrObject.RawSMDR.substring(62,86).replace(/\s/,``);
+		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
+		smdrObject.OfficeCodeInformation.OfficeCodeofCallingParty = smdrObject.RawSMDR.substring(98,102);
+		smdrObject.OfficeCodeInformation.OfficeCodeofBillingProcessOffice = smdrObject.RawSMDR.substring(102,106);
+		smdrObject.AuthorizationCode.AuthorizationCode = smdrObject.RawSMDR.substring(106,116);	
+		smdrObject.ConditionCodes.ConditionC.ChargeInformationCode = smdrObject.RawSMDR.substring(120,121);	
+		switch(rawSMDR.substring(120,121)) {
+			case `0`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `No data`;
+				break;
+			case `1`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 0.1 cent unit`;	
+				break;
+			case `2`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 1 cent unit`;	
+				break;
+			case `3`:	
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 10 cent unit`;
+				break;
+			case `4`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 1 dollar unit`;	
+				break;
+			case `F`:	
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information error (the maximum value is exceeded)`;
+				break;
+			default:
+				break;
+		}
+		smdrObject.ConditionCodes.ConditionC.ChargeInformation = smdrObject.RawSMDR.substring(121,127);
+		smdrObject.ConditionCodes.ConditionD.BillNotififyByAttCon = smdrObject.RawSMDR.substring(127,128);
+		smdrObject.ConditionCodes.ConditionD.AttCon = smdrObject.RawSMDR.substring(128,131);	
+		callback(smdrObject);
+	},
+	 
+	 parseKB (smdrObject) => {
+	/*
+		KB RECORD – STATION-TO-STATION NORMAL FORMAT
+		Untested
+	*/
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
+		if(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode ==`0`){
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = `PBX/CTX (DID) station`;
+		} else{
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = `Attendant Console`;
+		}
+		if(smdrObject.RawSMDR.substring(12,14) != `  `){
+			var rds3000 = false;
+			// 1000 & 2000 (RDS) Feature Packages
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
+		} else {
+			var rds3000 = true;		
+		}
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/,``);
+		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
+		smdrObject.CallTime.Start.Month =  parseInt(smdrObject.RawSMDR.substring(20,22));
+		smdrObject.CallTime.Start.Day =  parseInt(smdrObject.RawSMDR.substring(22,24));
+		smdrObject.CallTime.Start.Hour =  parseInt(smdrObject.RawSMDR.substring(24,26));
+		smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.RawSMDR.substring(26,28));
+		smdrObject.CallTime.Start.Second =  parseInt(smdrObject.RawSMDR.substring(28,30));
+		smdrObject.CallTime.End.Year = parseInt(smdrObject.RawSMDR.substring(118,120));
+		smdrObject.CallTime.End.Month =  parseInt(smdrObject.RawSMDR.substring(30,32));
+		smdrObject.CallTime.End.Day =  parseInt(smdrObject.RawSMDR.substring(32,34));
+		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
+		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
+		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
+		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50));
+		if(rds3000){
+			// 3000 (RDS) Series Feature Package and higher.
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);
+		}
+		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
+		if(smdrObject.ConditionCodes.CodeOneCode == 0){
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+		} else {
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+		}
+		smdrObject.ConditionCodes.CodeThreeCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
+		if(smdrObject.ConditionCodes.CodeThreeCode == 0){
+			smdrObject.ConditionCodes.CodeThree = `Regular Outgoing or Tandem call`);
+		} else {
+			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`);
+		}
+		if(rds3000){
+			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(70,73);
+		} else {
+			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(62,64);
+		}
+		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(64,70).replace(/\s/,``);
+	},
+	 
+	  parseKE (smdrObject) => {
+	/*
+		KE RECORD – INCOMING NORMAL FORMAT
+		Untested
+	*/
+		smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber = smdrObject.RawSMDR.substring(5,8);
+		smdrObject.IncomingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
+		if(smdrObject.RawSMDR.substring(12,14) != `  `){
+			var rds3000 = false;
+			// 1000 & 2000 (RDS) Feature Packages
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
+		} else {
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);
+			var rds3000 = true;		
+		}
+		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/,``);
+		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
+		smdrObject.CallTime.Start.Month =  parseInt(smdrObject.RawSMDR.substring(20,22));
+		smdrObject.CallTime.Start.Day =  parseInt(smdrObject.RawSMDR.substring(22,24));
+		smdrObject.CallTime.Start.Hour =  parseInt(smdrObject.RawSMDR.substring(24,26));
+		smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.RawSMDR.substring(26,28));
+		smdrObject.CallTime.Start.Second =  parseInt(smdrObject.RawSMDR.substring(28,30));
+		smdrObject.CallTime.End.Year = parseInt(smdrObject.RawSMDR.substring(118,120));
+		smdrObject.CallTime.End.Month =  parseInt(smdrObject.RawSMDR.substring(30,32));
+		smdrObject.CallTime.End.Day =  parseInt(smdrObject.RawSMDR.substring(32,34));
+		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
+		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
+		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
+		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50));
+		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
+		if(smdrObject.ConditionCodes.CodeOneCode == 0){
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+		} else {
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+		}
+		smdrObject.ConditionCodes.CodeTwoCode =  smdrObject.RawSMDR.substring(54,55);
+		switch(smdrObject.ConditionCodes.CodeTwoCode)) {
+			case `0`:
+				smdrObject.ConditionCodes.CodeTwo = `Incoming, Outgoing, or Tandem call with neither Outgoing Trunk Queuing nor Account Codes used`;
+				break;
+			case `1`:
+				smdrObject.ConditionCodes.CodeTwo = `Outgoing Trunk Queuing used, but not Account Codes`;	
+				break;
+			case `2`:
+				smdrObject.ConditionCodes.CodeTwo = `Account Codes used, but not Outgoing Trunk Queuing`;	
+				break;
+			case `3`:	
+				smdrObject.ConditionCodes.CodeTwo = `Both Outgoing Trunk Queuing and Account Codes used`;
+				break;
+			default:
+				break;
+		}
+		
+		smdrObject.ConditionCodes.CodeThreeCode =  smdrObject.RawSMDR.substring(55,56);
+		switch(smdrObject.ConditionCodes.CodeThreeCode) {
+			case 0:
+				smdrObject.ConditionCodes.CodeThree = `Regular Outgoing or Tandem call`;
+				break;
+			case 1:
+				smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`;	
+				break;
+			case 2:
+				smdrObject.ConditionCodes.CodeThree = `The call Route Advanced (AOPR).`;	
+				break;
+			case 3:	
+				smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call that Route Advanced`;
+				break;
+			case 4:
+				smdrObject.ConditionCodes.CodeThree = `Call routed to Least Cost Routing`;	
+				break;
+			case 5:	
+				smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call that is routed to Least Cost Routing`;
+				break;
+			default:
+				break;
+		}
+		if(smdrObject.ConditionCodes.CodeThreeCode > 1 && smdrObject.ConditionCodes.CodeThreeCode < 6){
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(56,59));
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(59,62));
+		} else {
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = false;
+			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = false;
+		}
+		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/,``);	
+		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
+		if(index186bit7){
+			smdrObject.OfficeCodeInformation.OfficeCodeofCallingParty = smdrObject.RawSMDR.substring(98,102);
+			smdrObject.OfficeCodeInformation.OfficeCodeofBillingProcessOffice = smdrObject.RawSMDR.substring(102,106);
+		} else if(index241bit4) {
+			smdrObject.CallingStationNumber.CallingPartyNumber = smdrObject.RawSMDR.substring(98,106);
+		}
+		smdrObject.ConditionCodes.ConditionC.ChargeInformationCode = smdrObject.RawSMDR.substring(120,121);	
+		switch(rawSMDR.substring(120,121)) {
+			case `0`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `No data`;
+				break;
+			case `1`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 0.1 cent unit`;	
+				break;
+			case `2`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 1 cent unit`;	
+				break;
+			case `3`:	
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 10 cent unit`;
+				break;
+			case `4`:
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information for 1 dollar unit`;	
+				break;
+			case `F`:	
+				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `Charge information error (the maximum value is exceeded)`;
+				break;
+			default:
+				break;
+		}
+		smdrObject.ConditionCodes.ConditionC.ChargeInformation = smdrObject.RawSMDR.substring(121,127);
+		smdrObject.ConditionCodes.ConditionD.BillNotififyByAttCon = smdrObject.RawSMDR.substring(127,128);
+	  },
 	 
 	 parseKJ: (smdrObject) => {
 	/*
-		RECORD – STATION-TO-STATION EXTENDED FORMAT
+		KJ RECORD – STATION-TO-STATION EXTENDED FORMAT
+		Incomplete
 	*/
 	
 	// Calling Party Information
@@ -140,6 +458,10 @@
 		callback(smdrObject);
 	},
 	
+	
+	
+	
+	
 	// SMDR Flexible Format Functions
 	
 	getCPIType: (inputCode) => {
@@ -152,6 +474,9 @@
 				break;
 			case `2`:
 				return(`Incoming Trunk`);
+				break;
+			case `3`:
+				return(`Monitored Number`);
 				break;
 			default:
 				return(`Unexpected Value`);
@@ -311,11 +636,11 @@
 				variableCharacter+=2;
 				smdrObject.IncomingTrunk.SeizedFusionPointCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 				variableCharacter+=3;
-				smdrObject.IncomingTrunk.PhysicalOutgoingRouteNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
+				smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 				variableCharacter+=3;
 				smdrObject.IncomingTrunk.TrunkNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 				variableCharacter+=3;
-				smdrObject.IncomingTrunk.LogicalOutgoingRouteNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
+				smdrObject.IncomingTrunk.LogicalIncomingRouteNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 				variableCharacter+=3;
 				smdrObject.ProcessingSMDR = smdrObject.ProcessingSMDR.substring(variableCharacter,smdrObject.ProcessingSMDR.length);
 			}
@@ -429,6 +754,7 @@
 				variableCharacter +=2;
 				smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 				variableCharacter +=2;
+				smdrObject.CallTime.Start.Second =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 				smdrObject.CallTime.Start.Second =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 				variableCharacter +=2;
 				smdrObject.CallTime.Start.Millisecond =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3));
