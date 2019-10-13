@@ -114,7 +114,7 @@ var index241bit4 = false;
 	
 	// SMDR Normal Format Functions
 	
-	parseKA (smdrObject, callback) => {
+	parseKA: (smdrObject, callback) => {
 	/*
 		KA RECORD - OUTGOING NORMAL FORMAT
 		Untested
@@ -148,9 +148,9 @@ var index241bit4 = false;
 		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
-			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
 		} else {
-			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeTwoCode =  parseInt(smdrObject.RawSMDR.substring(54,55));
 		switch(rawSMDR.substring(54,55)) {
@@ -233,7 +233,7 @@ var index241bit4 = false;
 		callback(smdrObject);
 	},
 	 
-	 parseKB (smdrObject, callback) => {
+	 parseKB: (smdrObject, callback) => {
 	/*
 		KB RECORD – STATION-TO-STATION NORMAL FORMAT
 		Untested
@@ -271,21 +271,21 @@ var index241bit4 = false;
 		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
-			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
 		} else {
-			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeThreeCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeThreeCode == 0){
-			smdrObject.ConditionCodes.CodeThree = `Regular Outgoing or Tandem call`);
+			smdrObject.ConditionCodes.CodeThree = `Regular Outgoing or Tandem call`;
 		} else {
-			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`);
+			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`;
 		}
 		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(64,70).replace(/\s/,``);
 		callback(smdrObject);
 	},
 	 
-	parseKE (smdrObject, callback) => {
+	parseKE: (smdrObject, callback) => {
 	/*
 		KE RECORD – INCOMING NORMAL FORMAT
 		Untested
@@ -319,12 +319,12 @@ var index241bit4 = false;
 		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
-			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
 		} else {
-			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeTwoCode =  smdrObject.RawSMDR.substring(54,55);
-		switch(smdrObject.ConditionCodes.CodeTwoCode)) {
+		switch(smdrObject.ConditionCodes.CodeTwoCode) {
 			case `0`:
 				smdrObject.ConditionCodes.CodeTwo = `Incoming, Outgoing, or Tandem call with neither Outgoing Trunk Queuing nor Account Codes used`;
 				break;
@@ -457,9 +457,9 @@ var index241bit4 = false;
 		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
-			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
 		} else {
-			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeTwoCode =  parseInt(smdrObject.RawSMDR.substring(54,55));
 		switch(rawSMDR.substring(54,55)) {
@@ -570,7 +570,7 @@ var index241bit4 = false;
 	},
 	 
 	 
-	parseKI (smdrObject, callback) => {
+	parseKI: (smdrObject, callback) => {
 	/*
 		KI RECORD – INCOMING EXTENDED FORMAT
 		Untested
@@ -604,12 +604,12 @@ var index241bit4 = false;
 		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
-			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
 		} else {
-			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeTwoCode =  smdrObject.RawSMDR.substring(54,55);
-		switch(smdrObject.ConditionCodes.CodeTwoCode)) {
+		switch(smdrObject.ConditionCodes.CodeTwoCode) {
 			case `0`:
 				smdrObject.ConditionCodes.CodeTwo = `Incoming, Outgoing, or Tandem call with neither Outgoing Trunk Queuing nor Account Codes used`;
 				break;
@@ -753,15 +753,15 @@ var index241bit4 = false;
 		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
-			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
 		} else {
-			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`);
+			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeThreeCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeThreeCode == 0){
-			smdrObject.ConditionCodes.CodeThree = `Regular Outgoing or Tandem call`);
+			smdrObject.ConditionCodes.CodeThree = `Regular Outgoing or Tandem call`;
 		} else {
-			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`);
+			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`;
 		}
 		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(64,70).replace(/\s/,``);
 	
