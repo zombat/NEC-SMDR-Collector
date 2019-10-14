@@ -161,7 +161,7 @@ client.on(`data`, (data) => {
 			'LengthDec': parseInt(data.toString().substring(2,7)),
 			'DeviceNumberHex': hexData.substring(14,18),
 			'DeviceNumber': hexData.substring(17,18),
-			'SequenceNumber': parseInt(data.toString().substring(8,10)),
+			'SequenceNumber': parseInt(data.toString().substring(9,10)),
 			'Record': data.toString().substring(8,data.length), 
 			'ParityByte': hexData.substring(hexData.length-2,hexData.length)
 		};
