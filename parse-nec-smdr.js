@@ -7,7 +7,151 @@ var index186bit7 = true;
 var index241bit4 = false;
 
  module.exports = {
-	 
+	// SMDR Flexible Format Functions
+	
+	getCPIType: (inputCode) => {
+		switch(inputCode) {
+			case `0`:
+				return(`PBX/CTX (DID) station`);
+				break;
+			case `1`:
+				return(`Attendant Console`);
+				break;
+			case `2`:
+				return(`Incoming Trunk`);
+				break;
+			case `3`:
+				return(`Monitored Number`);
+				break;
+			default:
+				return(`Unexpected Value`);
+				break;
+		}
+	},
+	
+	getConditionCodeType: (conditionNumber, inputCode) => {
+		switch (true) {
+			case ((conditionNumber == `0`) && (inputCode === `0`)) :
+				return(`No Condition`);
+				break;
+			case ((conditionNumber == `0`) && (inputCode === `1`)) :
+				return(`Call was transferred`);
+				break;	
+			case ((conditionNumber == `0`) && (inputCode === `2`)) :
+				return(`Billing is continued`);
+				break;
+			case ((conditionNumber == `0`) && (inputCode === `3`)) :
+				return(`Call was transferred & Billing is continued`);
+				break;
+			case ((conditionNumber == `0`) && (inputCode === `4`)) :
+				return(`Call was transferred to last called party`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `0`)) :
+				return(`No Condition`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `1`)) :
+				return(`by OG Queuing`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `2`)) :
+				return(`by dialing with Account Code`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `3`)) :
+				return(`by OG Queuing & dialing with Account Code`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `4`)) :
+				return(`by Forward Outside`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `5`)) :
+				return(`Not Used`);
+				break;
+			case ((conditionNumber == `1`) && (inputCode === `6`)) :
+				return(`by Forward Outside & dialing with Account Code`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `0`)) :
+				return(`No Condition`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `1`)) :
+				return(`via Att Con`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `2`)) :
+				return(`Direct (Alternate Routing)`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `3`)) :
+				return(`via Att Con (Alternate Routing)`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `4`)) :
+				return(`Direct (LCR Routing)`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `5`)) :
+				return(`via Att Con (LCR Routing)`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `6`)) :
+				return(`Direct (Called number = first 6 digits of Converted Number)`);
+				break;
+			case ((conditionNumber == `2`) && (inputCode === `7`)) :
+				return(`via Att Con (Called number = first 6 digits of Converted Number)`);
+				break;
+			default:
+				return(`Unexpected Value`);
+				break;
+		}	
+	},
+	
+	getChargeInformation:(inputCode) => {
+		switch(inputCode) {
+			case `0`:
+				return(`No Charge Information`);
+				break;
+			case `1`:
+				return(`1 cent unit`);
+				break;
+			case `2`:
+				return(`0.1 cent unit`);
+				break;
+			case `3`:
+				return(`10 cent unit`);
+				break;
+			case `4`:
+				return(`$1 unit`);
+				break;
+			case `5`:
+				return(`$10 unit`);
+				break;
+			case `6`:
+				return(`Calling Metering (4 digits)`);
+				break;
+			case `F`:
+				return(`Charge Information Error`);
+				break;
+			default:
+				return(`Unexpected Value`);
+				break;
+		}
+	},
+	
+	getCPNaniID: (inputCode) => {
+		switch(inputCode) {
+			case `0`:
+				return(`Unable to output`);
+				break;
+			case `1`:
+				return(`Display`);
+				break;
+			case `2`:
+				return(`Unable to Notify`);
+				break;
+			case `3`:
+				return(`Out of Service (Out of Area)`);
+				break;
+			case `4`:
+				return(`Public Telephone Origination`);
+				break;
+			default:
+				return(`Unexpected Value`);
+				break;
+		}
+	},		
+	
 	parseSMDR:(rawSMDR, callback) => {
 		var smdrObject = {
 			'AccountCode': {},
@@ -782,152 +926,6 @@ var index241bit4 = false;
 		smdrObject.CallTime.Duration.Milliseconds = smdrObject.CallTime.End.TimeStamp - smdrObject.CallTime.Start.TimeStamp;	
 		callback(smdrObject);
 	},
-	
-	
-	// SMDR Flexible Format Functions
-	
-	getCPIType: (inputCode) => {
-		switch(inputCode) {
-			case `0`:
-				return(`PBX/CTX (DID) station`);
-				break;
-			case `1`:
-				return(`Attendant Console`);
-				break;
-			case `2`:
-				return(`Incoming Trunk`);
-				break;
-			case `3`:
-				return(`Monitored Number`);
-				break;
-			default:
-				return(`Unexpected Value`);
-				break;
-		}
-	},
-	
-	getConditionCodeType: (conditionNumber, inputCode) => {
-		switch (true) {
-			case ((conditionNumber == `0`) && (inputCode === `0`)) :
-				return(`No Condition`);
-				break;
-			case ((conditionNumber == `0`) && (inputCode === `1`)) :
-				return(`Call was transferred`);
-				break;	
-			case ((conditionNumber == `0`) && (inputCode === `2`)) :
-				return(`Billing is continued`);
-				break;
-			case ((conditionNumber == `0`) && (inputCode === `3`)) :
-				return(`Call was transferred & Billing is continued`);
-				break;
-			case ((conditionNumber == `0`) && (inputCode === `4`)) :
-				return(`Call was transferred to last called party`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `0`)) :
-				return(`No Condition`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `1`)) :
-				return(`by OG Queuing`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `2`)) :
-				return(`by dialing with Account Code`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `3`)) :
-				return(`by OG Queuing & dialing with Account Code`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `4`)) :
-				return(`by Forward Outside`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `5`)) :
-				return(`Not Used`);
-				break;
-			case ((conditionNumber == `1`) && (inputCode === `6`)) :
-				return(`by Forward Outside & dialing with Account Code`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `0`)) :
-				return(`No Condition`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `1`)) :
-				return(`via Att Con`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `2`)) :
-				return(`Direct (Alternate Routing)`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `3`)) :
-				return(`via Att Con (Alternate Routing)`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `4`)) :
-				return(`Direct (LCR Routing)`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `5`)) :
-				return(`via Att Con (LCR Routing)`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `6`)) :
-				return(`Direct (Called number = first 6 digits of Converted Number)`);
-				break;
-			case ((conditionNumber == `2`) && (inputCode === `7`)) :
-				return(`via Att Con (Called number = first 6 digits of Converted Number)`);
-				break;
-			default:
-				return(`Unexpected Value`);
-				break;
-		}	
-	},
-	
-	getChargeInformation:(inputCode) => {
-		switch(inputCode) {
-			case `0`:
-				return(`No Charge Information`);
-				break;
-			case `1`:
-				return(`1 cent unit`);
-				break;
-			case `2`:
-				return(`0.1 cent unit`);
-				break;
-			case `3`:
-				return(`10 cent unit`);
-				break;
-			case `4`:
-				return(`$1 unit`);
-				break;
-			case `5`:
-				return(`$10 unit`);
-				break;
-			case `6`:
-				return(`Calling Metering (4 digits)`);
-				break;
-			case `F`:
-				return(`Charge Information Error`);
-				break;
-			default:
-				return(`Unexpected Value`);
-				break;
-		}
-	},
-	
-	getCPNaniID: (inputCode) => {
-		switch(inputCode) {
-			case `0`:
-				return(`Unable to output`);
-				break;
-			case `1`:
-				return(`Display`);
-				break;
-			case `2`:
-				return(`Unable to Notify`);
-				break;
-			case `3`:
-				return(`Out of Service (Out of Area)`);
-				break;
-			case `4`:
-				return(`Public Telephone Origination`);
-				break;
-			default:
-				return(`Unexpected Value`);
-				break;
-		}
-	},		
 
 	smdrSection01: (smdrObject, outgoingIncoming, callback) => {	
 	// 01 Outgoing Trunk / Incoming Trunk information

@@ -23,7 +23,12 @@ var		bufferArray = [];
 		continueInterval = true;
 		reconnectClient = false;
 
+const check911 = (smdrObject, callback) => {
+	
+}
+
 const checkDirectories = () => {
+	// Check for pre-existing log directory and create if needed.
 	try {
 		if (fs.existsSync(`./Logs`)) {
 		} else {
@@ -44,12 +49,14 @@ const checkDirectories = () => {
 }
 
 const logFile = (message, fileName) => {
+	// Append information to a log file.
 	fs.appendFile(`./Logs/` + fileName, message + `\n`, `utf8`, (err) => {
 	});
 };
 
 
 const logMessage = (direction, message, data, fileName) => {
+	// Log information to console, file, or both.
 	if(direction == `in`){
 		direction = `=>`;
 	} else if(direction == `out`){
@@ -67,6 +74,7 @@ const logMessage = (direction, message, data, fileName) => {
 };
 
 const padZero = (input) => {
+	// Pad digits with 0 if needed and returns two-digit format.
 	if(input < 10){
 		input = `0` + input;
 		return(input);
@@ -76,6 +84,7 @@ const padZero = (input) => {
 }
 
 const theDate = (returnType) => {
+	// Returns date or data/time.
 	var dateFnc = new Date();
 	var date = dateFnc.getFullYear() + `-` + (dateFnc.getMonth() + 1) + `-` + dateFnc.getDate();
 	var time = dateFnc.getHours() + `:` + padZero(dateFnc.getMinutes()) + `:` + padZero(dateFnc.getSeconds());
@@ -88,11 +97,12 @@ const theDate = (returnType) => {
 };
 		
 if(process.env.GET_FILES ===`true` && process.env.GET_NEAX ===`true`){
+	// Check for misconfiguration.
 	logMessage(`other`, `Configuration Error`, `Both GET_FILES and GET_NEAX cannot be true`);
 }		
 		
 const getFiles = () => {
-	// ` list of smdr files in directory
+	// List SMDR files and parse.
 	fs.readdir(`./Logs`, (err, files) => {
 		let smdrFiles = files.filter((file) => {
 			return path.extname(file).toLowerCase() == `.smdr`
@@ -142,13 +152,14 @@ client.on(`error`, (err) => {
 });
 
 client.on(`ready`, () => {
+	// Disable reconnection on client connection.
 	console.log(`Client connected`);
 	reconnectClient = false;
 	logMessage(`equal`, `Client`, `Client connected`);
 });
 
 client.on(`data`, (data) => {
-	// Check to see if proper connection is made.
+	// Process data from PBX.
 	if (data.toString().substring(1, 2) === `2`) {
 		logMessage(`in`, `SMDR Data`, data);
 		var hexData = data.toString(`hex`);
@@ -217,12 +228,14 @@ client.on(`close`, () => {
 });
 
 var intervalRequest = setInterval( () => {
+	// Main timer loop. 
 	if(process.env.GET_FILES == `true`){
 		getFiles();
 		 clearInterval(intervalRequest);
 	} else if(process.env.GET_NEAX == `true`){
 		if(reconnectClient){
 			necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
+				reconnectClient = false;
 			});
 		} else if(!continueInterval){
 			clearInterval(intervalRequest);

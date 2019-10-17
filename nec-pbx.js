@@ -9,7 +9,8 @@
 		if(connectionType == `sv9500`){
 			console.log(`Connecting to ` + connectionType + ` SMDR device ` + smdrConnection.device + ` at ` + smdrConnection.ipAddress + ` on port ` + smdrConnection.port);
 			client.connect(smdrConnection.port, smdrConnection.ipAddress, (response) => { 
-			callback(response);
+				
+				callback(response);
 			});
 		}
 	},
