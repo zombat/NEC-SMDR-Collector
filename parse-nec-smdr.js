@@ -289,7 +289,7 @@ var index241bit4 = false;
 		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
 		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
 		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
-		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
+		smdrObject.AccountCode.AccountCode = smdrObject.RawSMDR.substring(40,50).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
 			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
@@ -297,7 +297,7 @@ var index241bit4 = false;
 			smdrObject.ConditionCodes.CodeOne = `Call has been transferred`;
 		}
 		smdrObject.ConditionCodes.CodeTwoCode =  parseInt(smdrObject.RawSMDR.substring(54,55));
-		switch(rawSMDR.substring(54,55)) {
+		switch(smdrObject.ConditionCodes.CodeTwoCode) {
 			case 0:
 				smdrObject.ConditionCodes.CodeTwo = `Incoming, Outgoing, or Tandem call with neither Outgoing Trunk Queuing nor Account Codes used`;
 				break;
@@ -314,7 +314,7 @@ var index241bit4 = false;
 				break;
 		}
 		smdrObject.ConditionCodes.CodeThreeCode =  parseInt(smdrObject.RawSMDR.substring(55,56));
-		switch(rawSMDR.substring(55,56)) {
+		switch(smdrObject.ConditionCodes.CodeThreeCode) {
 			case 0:
 				smdrObject.ConditionCodes.CodeTwo = `Regular Outgoing or Tandem call`;
 				break;
@@ -349,7 +349,7 @@ var index241bit4 = false;
 		smdrObject.OfficeCodeInformation.OfficeCodeofBillingProcessOffice = smdrObject.RawSMDR.substring(102,106);
 		smdrObject.AuthorizationCode.AuthorizationCode = smdrObject.RawSMDR.substring(106,116);	
 		smdrObject.ConditionCodes.ConditionC.ChargeInformationCode = smdrObject.RawSMDR.substring(120,121);	
-		switch(rawSMDR.substring(120,121)) {
+		switch(smdrObject.ConditionCodes.ConditionC.ChargeInformationCode) {
 			case `0`:
 				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `No data`;
 				break;
@@ -412,7 +412,7 @@ var index241bit4 = false;
 		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
 		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
 		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
-		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
+		smdrObject.AccountCode.AccountCode = smdrObject.RawSMDR.substring(40,50).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
 			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
@@ -460,7 +460,7 @@ var index241bit4 = false;
 		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
 		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
 		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
-		smdrObject.AccountCode.AccountCode = parseInt(smdrObject.RawSMDR.substring(40,50)).replace(/\s/,``);
+		smdrObject.AccountCode.AccountCode = smdrObject.RawSMDR.substring(40,50).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
 			smdrObject.ConditionCodes.CodeOne = `Call has not transferred`;
@@ -523,7 +523,7 @@ var index241bit4 = false;
 			smdrObject.CallingStationNumber.CallingPartyNumber = smdrObject.RawSMDR.substring(98,106);
 		}
 		smdrObject.ConditionCodes.ConditionC.ChargeInformationCode = smdrObject.RawSMDR.substring(120,121);	
-		switch(rawSMDR.substring(120,121)) {
+		switch(smdrObject.ConditionCodes.ConditionC.ChargeInformationCode) {
 			case `0`:
 				smdrObject.ConditionCodes.ConditionC.ChargeInformation = `No data`;
 				break;
