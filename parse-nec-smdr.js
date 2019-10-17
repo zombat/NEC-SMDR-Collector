@@ -266,7 +266,7 @@ var index241bit4 = false;
 		smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber = smdrObject.RawSMDR.substring(5,8);
 		smdrObject.OutgoingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
-		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = module.exports.getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
 		if(!rds3000){
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
 		} else {
@@ -437,7 +437,7 @@ var index241bit4 = false;
 		smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber = smdrObject.RawSMDR.substring(5,8);
 		smdrObject.IncomingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
-		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = module.exports.getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
 		if(!rds3000){
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
 		} else {
@@ -722,7 +722,7 @@ var index241bit4 = false;
 		smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber = smdrObject.RawSMDR.substring(5,8);
 		smdrObject.IncomingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
-		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
+		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = module.exports.getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
 		if(!rds3000){
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
 		} else {
