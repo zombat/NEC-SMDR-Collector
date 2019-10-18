@@ -7,4 +7,4 @@ All trademarks are the property of their respective owners.
 
 No agreement has been made between any party to ensure support of this project. Any connectivity issues should be investigated with your authorized support representative. 
 
- * the extent permitted by applicable law.
+ * To the extent permitted by applicable law.
