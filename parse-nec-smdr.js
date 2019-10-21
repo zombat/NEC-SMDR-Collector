@@ -1,13 +1,36 @@
  /*
 	Module to parse SMDR messages.
 */
+
+/*
+		This program is free software. It comes without any warranty, and is offered “as-is”, without warranty. The software user accepts all liability for damages resulting in the use of this software.
+		All trademarks are the property of their respective owners.
+		No agreement has been made between any party to ensure support of this project. Any connectivity issues should be investigated with your authorized support representative.
+		To the extent permitted by applicable law.
+
+		GNU GENERAL PUBLIC LICENSE
+        Version 3, 29 June 2007
+		
+		See LICENSE file for more information.
+*/
+
 var rds3000 = true;
 var hds5200 = true;
 var index186bit7 = true;
 var index241bit4 = false;
+var yearPrefix = `20`;
 
  module.exports = {
-	// SMDR Flexible Format Functions
+	
+	padZero: (input) => {
+		// Pad digits with 0 if needed and returns two-digit format.
+		if(input < 10){
+			input = `0` + input;
+			return(input);
+		} else {
+			return(input);
+		}
+	},
 	
 	getCPIType: (inputCode) => {
 		switch(inputCode) {
@@ -273,14 +296,15 @@ var index241bit4 = false;
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);		
 		}
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/,``);
-		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
+		smdrObject.CallTime.Start.Year = parseInt(yearPrefix +  smdrObject.RawSMDR.substring(116,118));
 		smdrObject.CallTime.Start.Month =  parseInt(smdrObject.RawSMDR.substring(20,22));
 		smdrObject.CallTime.Start.Day =  parseInt(smdrObject.RawSMDR.substring(22,24));
 		smdrObject.CallTime.Start.Hour =  parseInt(smdrObject.RawSMDR.substring(24,26));
 		smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.RawSMDR.substring(26,28));
 		smdrObject.CallTime.Start.Second =  parseInt(smdrObject.RawSMDR.substring(28,30));
+		smdrObject.CallTime.Start.Millisecond =  0;
 		if(hds5200){
-			smdrObject.CallTime.End.Year = parseInt(smdrObject.RawSMDR.substring(118,120));
+			smdrObject.CallTime.End.Year = parseInt(yearPrefix + smdrObject.RawSMDR.substring(118,120));
 		} else {
 			smdrObject.CallTime.End.Year = smdrObject.CallTime.Start.Year;
 		}
@@ -289,6 +313,12 @@ var index241bit4 = false;
 		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
 		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
 		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
+		smdrObject.CallTime.End.Millisecond =  0;
+		smdrObject.CallTime.Start.TimeStamp = new Date(smdrObject.CallTime.Start.Year, smdrObject.CallTime.Start.Month, smdrObject.CallTime.Start.Day, module.exports.padZero(smdrObject.CallTime.Start.Hour), module.exports.padZero(smdrObject.CallTime.Start.Minute), module.exports.padZero(smdrObject.CallTime.Start.Second));		
+		smdrObject.CallTime.End.TimeStamp = new Date(smdrObject.CallTime.End.Year, smdrObject.CallTime.End.Month, smdrObject.CallTime.End.Day, smdrObject.CallTime.End.Hour, smdrObject.CallTime.End.Minute, smdrObject.CallTime.End.Second, smdrObject.CallTime.End.Millisecond);		
+		module.exports.callDuration(smdrObject, (returnObject) => {
+			smdrObject.CallTime.Duration = 	returnObject.CallTime.Duration;			
+		});
 		smdrObject.AccountCode.AccountCode = smdrObject.RawSMDR.substring(40,50).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
@@ -343,7 +373,7 @@ var index241bit4 = false;
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = false;
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = false;
 		}
-		smdrObject.DialCode.DialCode = smdrObject.RawSMDR.substring(62,86).replace(/\s/,``);
+		smdrObject.DialCode.DialCode = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
 		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
 		smdrObject.OfficeCodeInformation.OfficeCodeofCallingParty = smdrObject.RawSMDR.substring(98,102);
 		smdrObject.OfficeCodeInformation.OfficeCodeofBillingProcessOffice = smdrObject.RawSMDR.substring(102,106);
@@ -412,6 +442,11 @@ var index241bit4 = false;
 		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
 		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
 		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
+		smdrObject.CallTime.Start.TimeStamp = new Date(smdrObject.CallTime.Start.Year, smdrObject.CallTime.Start.Month, smdrObject.CallTime.Start.Day, module.exports.padZero(smdrObject.CallTime.Start.Hour), module.exports.padZero(smdrObject.CallTime.Start.Minute), module.exports.padZero(smdrObject.CallTime.Start.Second));		
+		smdrObject.CallTime.End.TimeStamp = new Date(smdrObject.CallTime.End.Year, smdrObject.CallTime.End.Month, smdrObject.CallTime.End.Day, smdrObject.CallTime.End.Hour, smdrObject.CallTime.End.Minute, smdrObject.CallTime.End.Second, smdrObject.CallTime.End.Millisecond);		
+		module.exports.callDuration(smdrObject, (returnObject) => {
+			smdrObject.CallTime.Duration = 	returnObject.CallTime.Duration;			
+		});
 		smdrObject.AccountCode.AccountCode = smdrObject.RawSMDR.substring(40,50).replace(/\s/,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){
@@ -426,6 +461,7 @@ var index241bit4 = false;
 			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`;
 		}
 		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(64,70).replace(/\s/,``);
+		console.log(smdrObject.CallTime);	
 		callback(smdrObject);
 	},
 	 
@@ -908,14 +944,6 @@ var index241bit4 = false;
 			smdrObject.ConditionCodes.CodeThree = `Attendant Operator assisted call`;
 		}
 		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(64,70).replace(/\s/,``);
-	
-	
-	
-	
-	
-	
-	
-	
 		callback(smdrObject);
 	}, 
 	 
