@@ -28,7 +28,7 @@ const	net = require(`net`),
 			'ipAddress': process.env.NEC_SMDR_IP_ADDRESS,
 			'port': process.env.NEC_SMDR_PORT,
 			'device': process.env.NEC_SMDR_DEVICE
-		};
+		},
 		dbFunctions = require(`./mongo-db.js`),
 		// Set interval timers X * 1000 for # of seconds
 			intervalTimer = 5*1000;
@@ -74,11 +74,11 @@ const logFile = (message, fileName) => {
 const logMessage = (direction, message, data, fileName) => {
 	// Log information to console, file, or both.
 	if(direction == `in`){
-		direction = `=>`;
+		var direction = `=>`;
 	} else if(direction == `out`){
-		direction = `<=`;
-	} else if(direction == `equal`){
-		direction = `--`;
+		var direction = `<=`;
+	} else if(direction == `other`){
+		var direction = `--`;
 	}
 	var theMessage = `\t` + direction + `\t` + message + `:\t` + data;
 	if(process.env.VERBOSE_CONSOLE ===`true`){
@@ -171,7 +171,7 @@ client.on(`ready`, () => {
 	// Disable reconnection on client connection.
 	console.log(`Client connected`);
 	reconnectClient = false;
-	logMessage(`equal`, `Client`, `Client connected`);
+	logMessage(`other`, `Client`, `Client connected`);
 });
 
 client.on(`data`, (data) => {
@@ -245,27 +245,34 @@ client.on(`close`, () => {
 
 var intervalRequest = setInterval( () => {
 	// Main timer loop. 
-	if(process.env.GET_FILES == `true`){
-		getFiles();
-		 clearInterval(intervalRequest);
-	} else if(process.env.GET_NEAX == `true`){
-		if(reconnectClient){
-			necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
-				reconnectClient = false;
-			});
-		} else if(!continueInterval){
-			clearInterval(intervalRequest);
-		} else if(sendSMDRRequest){
-			necPBX.sendSMDRRequest(smdrConnection, client, (smdrRequestBuffer) => {
-				logMessage(`in`, `SMDR Request`, smdrRequestBuffer);
-			});
-		} else{
-			necPBX.sendStatusMonitor(smdrConnection, client, (statusMonitorBuffer) => {
-				logMessage(`in`, `Status Monitor`, statusMonitorBuffer);
-			});
-			sendSMDRRequest = true;
+	// Check for MongoDB connection
+	dbFunctions.serverStatus( (serverStatus) => {
+		if(serverStatus){
+			if(process.env.GET_FILES == `true`){
+				getFiles();
+				 clearInterval(intervalRequest);
+			} else if(process.env.GET_NEAX == `true`){
+				if(reconnectClient){
+					necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
+						reconnectClient = false;
+					});
+				} else if(!continueInterval){
+					clearInterval(intervalRequest);
+				} else if(sendSMDRRequest){
+					necPBX.sendSMDRRequest(smdrConnection, client, (smdrRequestBuffer) => {
+						logMessage(`out`, `SMDR Request`, smdrRequestBuffer);
+					});
+				} else{
+					necPBX.sendStatusMonitor(smdrConnection, client, (statusMonitorBuffer) => {
+						logMessage(`out`, `Status Monitor`, statusMonitorBuffer);
+					});
+					sendSMDRRequest = true;
+				}
+			}
+		} else {
+			logMessage(`other`, `MongoDB`, `Error connecting to MongoDB`);
 		}
-	}
+	});
 }, intervalTimer);
 
 if(process.env.GET_NEAX){

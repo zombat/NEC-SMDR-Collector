@@ -49,7 +49,7 @@ var yearPrefix = `20`;
 			default:
 				return(`Unexpected Value`);
 				break;
-		}
+		};
 	},
 	
 	getConditionCodeType: (conditionNumber, inputCode) => {
@@ -117,7 +117,7 @@ var yearPrefix = `20`;
 			default:
 				return(`Unexpected Value`);
 				break;
-		}	
+		};
 	},
 	
 	getChargeInformation:(inputCode) => {
@@ -149,7 +149,7 @@ var yearPrefix = `20`;
 			default:
 				return(`Unexpected Value`);
 				break;
-		}
+		};
 	},
 	
 	getCPNaniID: (inputCode) => {
@@ -172,7 +172,7 @@ var yearPrefix = `20`;
 			default:
 				return(`Unexpected Value`);
 				break;
-		}
+		};
 	},		
 	
 	parseSMDR:(rawSMDR, callback) => {
@@ -276,7 +276,7 @@ var yearPrefix = `20`;
 					break;
 				default:
 					break;
-			}	
+			};	
 	},
 	
 	// SMDR Normal Format Functions
@@ -365,7 +365,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		if(smdrObject.ConditionCodes.CodeThreeCode > 1 && smdrObject.ConditionCodes.CodeThreeCode < 6){
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(56,59));
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(59,62));
@@ -400,7 +400,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		smdrObject.ConditionCodes.ConditionC.ChargeInformation = smdrObject.RawSMDR.substring(121,127);
 		smdrObject.ConditionCodes.ConditionD.BillNotififyByAttCon = smdrObject.RawSMDR.substring(127,128);
 		smdrObject.ConditionCodes.ConditionD.AttCon = smdrObject.RawSMDR.substring(128,131);	
@@ -519,7 +519,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}	
+		};	
 		smdrObject.ConditionCodes.CodeThreeCode =  smdrObject.RawSMDR.substring(55,56);
 		switch(smdrObject.ConditionCodes.CodeThreeCode) {
 			case 0:
@@ -542,7 +542,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		if(smdrObject.ConditionCodes.CodeThreeCode > 1 && smdrObject.ConditionCodes.CodeThreeCode < 6){
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(56,59));
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(59,62));
@@ -580,7 +580,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		smdrObject.ConditionCodes.ConditionC.ChargeInformation = smdrObject.RawSMDR.substring(121,127);
 		smdrObject.ConditionCodes.ConditionD.BillNotififyByAttCon = smdrObject.RawSMDR.substring(127,128);
 		callback(smdrObject);
@@ -611,7 +611,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}	
+		};	
 		if(!rds3000){
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
 		} else {
@@ -657,7 +657,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		smdrObject.ConditionCodes.CodeThreeCode =  parseInt(smdrObject.RawSMDR.substring(55,56));
 		switch(rawSMDR.substring(55,56)) {
 			case 0:
@@ -680,7 +680,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		if(smdrObject.ConditionCodes.CodeThreeCode > 1 && smdrObject.ConditionCodes.CodeThreeCode < 6){
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(56,59));
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(59,62));
@@ -717,7 +717,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		smdrObject.ConditionCodes.ConditionC.ChargeInformation = smdrObject.RawSMDR.substring(121,127);
 		smdrObject.ConditionCodes.ConditionD.BillNotififyByAttCon = smdrObject.RawSMDR.substring(127,128);
 		smdrObject.ConditionCodes.ConditionD.AttCon = smdrObject.RawSMDR.substring(128,131);
@@ -744,7 +744,7 @@ var yearPrefix = `20`;
 					break;
 				default:
 					break;
-			}
+			};
 		smdrObject.CallingPartyInformation.CPNorANI = smdrObject.RawSMDR.substring(133,165).replace(/\s/,``);
 		callback(smdrObject);
 	},
@@ -804,7 +804,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}	
+		};	
 		smdrObject.ConditionCodes.CodeThreeCode =  smdrObject.RawSMDR.substring(55,56);
 		switch(smdrObject.ConditionCodes.CodeThreeCode) {
 			case 0:
@@ -827,7 +827,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		if(smdrObject.ConditionCodes.CodeThreeCode > 1 && smdrObject.ConditionCodes.CodeThreeCode < 6){
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(56,59));
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = parseInt(smdrObject.RawSMDR.substring(59,62));
@@ -863,7 +863,7 @@ var yearPrefix = `20`;
 				break;
 			default:
 				break;
-		}
+		};
 		smdrObject.ConditionCodes.ConditionC.ChargeInformation = smdrObject.RawSMDR.substring(121,127);
 		smdrObject.ConditionCodes.ConditionD.BillNotififyByAttCon = smdrObject.RawSMDR.substring(127,128);
 		smdrObject.ConditionCodes.ConditionD.AttCon = smdrObject.RawSMDR.substring(128,131);
@@ -890,7 +890,7 @@ var yearPrefix = `20`;
 					break;
 				default:
 					break;
-			}
+			};
 		smdrObject.CallingPartyInformation.CPNorANI = smdrObject.RawSMDR.substring(133,165).replace(/\s/,``);	
 		callback(smdrObject);
 	},

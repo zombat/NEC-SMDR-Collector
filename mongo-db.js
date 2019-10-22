@@ -19,11 +19,32 @@ const	assert = require(`assert`),
 		mongoClient = require(`./mongoClient.js`);
  
  module.exports = {
+	 
+	serverStatus: (callback) => {
+		try {
+			mongoClient( (err, client) => { 
+			if(err){
+				callback(false);
+			} else {
+				client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).findOne( (err, response) => {
+					if(response){
+						callback(true);
+					} else {
+						callback(false);
+					}
+				});
+			}
+			});
+		} catch {
+			callback(false);
+		}
+	},
+	 
 	insertSMDRRecord: (smdrRecord, callback) => {
 		smdrRecord[`_id`] = smdrRecord.RawSMDR;
 		mongoClient(function(err, client){
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).insertOne( smdrRecord, (err, response) => {
-				//assert.equal(null, err);
+				//
 				if(err){
 					
 				}
