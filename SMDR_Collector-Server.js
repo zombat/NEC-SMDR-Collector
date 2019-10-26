@@ -17,13 +17,13 @@
 require(`dotenv`).config();
 const	net = require(`net`),
 		client = new net.Socket(),
-		nodemailer = require(`nodemailer`),
 		records = [],
 		buffer = require(`buffer`),
 		path = require(`path`),
 		fs = require(`fs`),
 		necSMDR = require(`./parse-nec-smdr.js`),
 		necPBX = require(`./nec-pbx.js`),
+		notify = require(`./notify-fnc.js`),
 		smdrConnection = {
 			'ipAddress': process.env.NEC_SMDR_IP_ADDRESS,
 			'port': process.env.NEC_SMDR_PORT,
@@ -34,10 +34,11 @@ const	net = require(`net`),
 			intervalTimer = 5*1000;
 var		bufferArray = [];
 		smdrPath = null,
-		sendSMDRRequest = false;
-		sendStatusMonitorRequest = false;
-		continueInterval = true;
-		reconnectClient = false;
+		sendSMDRRequest = false,
+		sendStatusMonitorRequest = false,
+		continueInterval = true,
+		reconnectClient = false,
+		enableNotification = true;
 
 const check911 = (smdrObject, callback) => {
 	
@@ -79,6 +80,8 @@ const logMessage = (direction, message, data, fileName) => {
 		var direction = `<=`;
 	} else if(direction == `other`){
 		var direction = `--`;
+	} else if(direction == `notify`){
+		var direction = `!!`;
 	}
 	var theMessage = `\t` + direction + `\t` + message + `:\t` + data;
 	if(process.env.VERBOSE_CONSOLE ===`true`){
@@ -133,7 +136,11 @@ const getFiles = () => {
 								logMessage(`other`, `SMDR String`, smdrEntry);
 								logMessage(`in`, `Database Response`, JSON.stringify(response));
 							});
-							
+							notify.processNotification(response, (notifyResponse) => {
+								if(notifyResponse != null){
+									logMessage(`notify`, `Notification Rule`, notifyResponse);
+								}
+							});
 						});
 					});
 				});

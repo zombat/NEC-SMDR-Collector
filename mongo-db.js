@@ -19,8 +19,17 @@ const	assert = require(`assert`),
 		mongoClient = require(`./mongoClient.js`);
  
  module.exports = {
-	 
-	serverStatus: (callback) => {
+	
+	getNotifyInfo: (callback) => {
+		mongoClient(function(err, client){
+			client.db(process.env.MONGO_DATABASE).collection(`Notification Settings`).find({}).toArray((err, documents) => {
+					assert.equal(null, err);
+					callback(documents);		
+				});
+		});
+	},
+	
+	serverStatus: (callback) => { 
 		try {
 			mongoClient( (err, client) => { 
 			if(err){
