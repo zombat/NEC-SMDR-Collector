@@ -20,11 +20,17 @@ const 	physicalNumber = process.env.USE_PHYSICAL_NUMBER;
 		transporter = nodemailer.createTransport({
 			host: process.env.SMTP_SERVER_HOST,
 			port: process.env.SMTP_SERVER_PORT,
-			secure: process.env.SMTP_SERVER_SECURITY,
+			requireTLS: true,
+			secure: false,
+			// secure: process.env.SMTP_SERVER_SECURITY,
 			auth: {
 				user: process.env.SMTP_SERVER_USER, 
 				pass: process.env.SMTP_SERVER_PASSWORD
-			}}),
+			},
+			tls: {
+				rejectUnauthorized : "false"
+			}
+			}),
 		fromString = `"` + process.env.SMTP_SERVER_USER_FRIENDLY + `" <` + process.env.SMTP_SERVER_USER + `>` ;
 var 	searchQuery = {},
 		queryTest = true;
@@ -146,4 +152,3 @@ var 	searchQuery = {},
 	}
  
  };
- 

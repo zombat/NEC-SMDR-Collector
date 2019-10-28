@@ -171,7 +171,7 @@ client.on(`error`, (err) => {
         console.log(`Connection timed out.`);
         client.exit;
     }
-	logMessage(`equal`, `Client`, `Client Error`, err);
+	logMessage(`other`, `Client`, `Client Error`, err);
 });
 
 client.on(`ready`, () => {
@@ -213,6 +213,11 @@ client.on(`data`, (data) => {
 						dbFunctions.insertSMDRRecord(smdrObject, (response) => {
 							logMessage(`in`, `Database Response`, JSON.stringify(response));
 						});
+						notify.processNotification(smdrObject, (notifyResponse) => {
+							if(notifyResponse != null){
+								logMessage(`notify`, `Notification Rule`, notifyResponse);
+							}
+						});
 					});
 				});
 			}
@@ -247,7 +252,7 @@ client.on(`close`, () => {
 	client.destroy();
 	reconnectClient = true;
 	console.log(`Client connection closed`);
-	logMessage(`equal`, `Client`, `Client connection closed`);
+	logMessage(`other`, `Client`, `Client connection closed`);
 });
 
 var intervalRequest = setInterval( () => {
