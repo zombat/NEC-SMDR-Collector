@@ -35,12 +35,13 @@ const	assert = require(`assert`),
 			if(err){
 				callback(false);
 			} else {
-				client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).findOne( (err, response) => {
-					if(response){
+				client.db(process.env.MONGO_DATABASE).admin().serverStatus(function(err, status) {
+					if(status.ok){
 						callback(true);
 					} else {
 						callback(false);
 					}
+					client.close();
 				});
 			}
 			});

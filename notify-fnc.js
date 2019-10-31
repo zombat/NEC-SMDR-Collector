@@ -20,15 +20,14 @@ const 	physicalNumber = process.env.USE_PHYSICAL_NUMBER;
 		transporter = nodemailer.createTransport({
 			host: process.env.SMTP_SERVER_HOST,
 			port: process.env.SMTP_SERVER_PORT,
-			requireTLS: true,
-			secure: false,
-			// secure: process.env.SMTP_SERVER_SECURITY,
+			requireTLS: process.env.SMTP_SERVER_TLS,
+			secure: process.env.SMTP_SERVER_SMTP_SERVER_SECURE,
 			auth: {
 				user: process.env.SMTP_SERVER_USER, 
 				pass: process.env.SMTP_SERVER_PASSWORD
 			},
 			tls: {
-				rejectUnauthorized : "false"
+				rejectUnauthorized : process.env.SMTP_SERVER_REJECT_CERTS
 			}
 			}),
 		fromString = `"` + process.env.SMTP_SERVER_USER_FRIENDLY + `" <` + process.env.SMTP_SERVER_USER + `>` ;
@@ -49,56 +48,139 @@ var 	searchQuery = {},
 						}
 						var notify = false;
 						if(physicalNumber && smdrObject.CallingPartyInformation.PhysicalNumber.hasOwnProperty(`CallingPartyTenant`)){
-							var tenant = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant);
-							var callingNumber = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber);
-							var calledNumber = parseInt(smdrObject.CalledPartyInformation.PhysicalNumber.CallingNumber);
+							var tenant = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant) || false;
+							var callingNumber = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber) || false;
+							var calledNumber = parseInt(smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber) || false;
 							if(smdrObject.OutgoingTrunk.hasOwnProperty(`PhysicalOutgoingRouteNumber`) && smdrObject.OutgoingTrunk.hasOwnProperty(`TrunkNumber`)){
-								var route = parseInt(smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber);
-								var trunk = parseInt(smdrObject.OutgoingTrunk.TrunkNumber);
+								var outRoute = parseInt(smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber);
+								var outTrunk = parseInt(smdrObject.OutgoingTrunk.TrunkNumber);
+							} else {
+								var outRoute = false;
+								var outTrunk = false;
 							}
 						} else {
-							let tenant = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingPartyTenant)  || 0;
-							let callingNumber = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingNumber);
-							let calledNumber = parseInt(smdrObject.CalledPartyInformation.TelephoneNumber.CallingNumber);
+							var tenant = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingPartyTenant)  || 0;
+							var callingNumber = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingNumber) || false;
+							var calledNumber = parseInt(smdrObject.CalledPartyInformation.TelephoneNumber.CalledNumber) || false;
 						}
-						emailContent += `Calling Number: ` + callingNumber + `\n`;
+						if(callingNumber){
+							if(emailContentType == `text`){
+								emailContent += `Calling Station: ` + callingNumber + `\n`;
+							} else {
+								emailContent += `<p>Calling Station: ` + callingNumber + `</p>`;
+							}
+						}
 						if(document.hasOwnProperty(`Tenant`)){
 							if(document.Tenant == tenant){
-								notify = true;
-								emailContent += `Tenant Number: ` + tenant + `\n`;
+								notify = true;				
+								if(emailContentType == `text`){
+									emailContent += `Tenant Number: ` + tenant + `\n`;
+								} else {
+									emailContent += `<p>Tenant Number: ` + tenant + `</p>`;
+								}
 							} else {
 								notify = false;
 							}
 						}
 						if(document.hasOwnProperty(`MAID`)){
-							
+							if(smdrObject.MAID.hasOwnProperty(`CallingPartyMAID`)){
+								notify = true;		
+								if(emailContentType == `text`){
+									emailContent += `Message Area ID: ` + smdrObject.MAID.CallingPartyMAID + `\n`;
+								} else {
+									emailContent += `<p>Message Area ID: ` + smdrObject.MAID.CallingPartyMAID + `</p>`;
+								}
+							} else {
+								notify = false;
+							}	
 						}
 						if(document.hasOwnProperty(`Dialed Number`)){
 							if(smdrObject.DialCode.hasOwnProperty(`DialCode`) && document[`Dialed Number`] ==  smdrObject.DialCode.DialCode){
-								notify = true;
-								emailContent += `Dialed Number: ` + smdrObject.DialCode.DialCode + `\n`;
+								notify = true;	
+								if(emailContentType == `text`){
+									emailContent += `Dialed Number: ` + smdrObject.DialCode.DialCode + `\n`;
+								} else {
+									emailContent += `<p>Dialed Number: ` + smdrObject.DialCode.DialCode + `</p>`;
+								}
+								if(outRoute && outTrunk){
+									if(emailContentType == `text`){
+										emailContent += `Route : ` + outRoute + `\n`;
+										emailContent += `Trunk : ` + outTrunk + `\n`;
+									} else {
+										emailContent += `<p>Route: ` + outRoute + `</p>`;
+										emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+									}
+								}
 							} else {
 								notify = false;
 							}			
 						}
 						if(document.hasOwnProperty(`Calling Station`)){
-							
+							if(callingNumber != undefined && document[`Calling Station`] ==  callingNumber){
+								notify = true;
+								if(outRoute && outTrunk){
+									if(emailContentType == `text`){
+										emailContent += `Route : ` + outRoute + `\n`;
+										emailContent += `Trunk : ` + outTrunk + `\n`;
+									} else {
+										emailContent += `<p>Route: ` + outRoute + `</p>`;
+										emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+									}
+								}
+								if(calledNumber){				
+									if(emailContentType == `text`){
+										emailContent += `Called Station: ` + calledNumber + `\n`;
+									} else {
+										emailContent += `<p>Called Station: ` + calledNumber + `</p>`;
+									}
+								}
+								if(smdrObject.DialCode.hasOwnProperty(`DialCode`)){
+									if(emailContentType == `text`){
+										emailContent += `Dialed Number: ` + smdrObject.DialCode.DialCode + `\n`;
+									} else {
+										emailContent += `<p>Dialed Number: ` + smdrObject.DialCode.DialCode + `</p>`;
+									}
+								}
+									
+							} else {
+								notify = false;
+							}
 						}
 						if(document.hasOwnProperty(`Called Station`)){
-							
+							if(calledNumber){
+								notify = true;
+								
+								if(emailContentType == `text`){
+									emailContent += `Called Station: ` + calledNumber + `\n`;
+								} else {
+									emailContent += `<p>Called Station: ` + calledNumber + `</p>`;
+								}
+							} else {
+								notify = false;
+							}
 						}
 						if(document.hasOwnProperty(`Route`)){
-							if(document.Route == route){
+							if(document.Route == outRoute){
 								notify = true;
-								emailContent += `Route: ` + route + `\n`;
+								
+								if(emailContentType == `text`){
+									emailContent += `Route: ` + outRoute + `\n`;
+								} else {
+									emailContent += `<p>Route: ` + outRoute + `</p>`;
+								}
 							} else {
 								notify = false;
 							}
 						}
 						if(document.hasOwnProperty(`Trunk`)){
-							if(document.Trunk == trunk){
+							if(document.Trunk == outTrunk){
 								notify = true;
-								emailContent += `Trunk: ` + trunk + `\n`;
+								
+								if(emailContentType == `text`){
+									emailContent += `Trunk: ` + outTrunk + `\n`;
+								} else {
+									emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+								}
 							} else {
 								notify = false;
 							}
@@ -109,10 +191,10 @@ var 	searchQuery = {},
 							document[`Email Text`].forEach( (contentLine) => { 
 								emailContent += contentLine + `\n`;
 							});
-							
 						}
-						
 						if(notify){
+							console.log(emailContent);
+							console.log(emailContent);
 							if(document.hasOwnProperty(`Notify List`) && emailContentType != undefined){
 								document[`Notify List`].forEach( (emailAddress) => {
 									module.exports.sendMail(emailAddress, emailSubject, emailContentType, emailContent, (emailResponse) => {
@@ -142,13 +224,15 @@ var 	searchQuery = {},
 		} else if(emailContentType == `html`) {
 			emailParameters.html = emailContent
 		}	 
-		transporter.sendMail(emailParameters, (err, mailResponse) => {
-			if(err){
-				callback(err)
-			} else {
-				callback(mailResponse);
-			}
-		});
+		if(emailTo.length){
+			transporter.sendMail(emailParameters, (err, mailResponse) => {
+				if(err){
+					callback(err)
+				} else {
+					callback(mailResponse);
+				}
+			});
+		}
 	}
  
  };
