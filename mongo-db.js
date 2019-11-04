@@ -19,16 +19,44 @@ const	assert = require(`assert`),
 		mongoClient = require(`./mongoClient.js`);
  
  module.exports = {
+	
+	getNotifyInfo: (callback) => {
+		mongoClient(function(err, client){
+			client.db(process.env.MONGO_DATABASE).collection(`Notification Settings`).find({}).toArray((err, documents) => {
+					assert.equal(null, err);
+					callback(documents);		
+				});
+		});
+	},
+	
+	serverStatus: (callback) => { 
+		try {
+			mongoClient( (err, client) => { 
+			if(err){
+				callback(false);
+			} else {
+				client.db(process.env.MONGO_DATABASE).admin().serverStatus(function(err, status) {
+					if(status.ok){
+						callback(true);
+					} else {
+						callback(false);
+					}
+					client.close();
+				});
+			}
+			});
+		} catch {
+			callback(false);
+		}
+	},
+	 
 	insertSMDRRecord: (smdrRecord, callback) => {
-		smdrRecord[`_id`] = smdrRecord.RawSMDR;
+		smdrRecord[`_id`] = smdrRecord.RawSMDR.replace(/\s/g,``);
 		mongoClient(function(err, client){
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).insertOne( smdrRecord, (err, response) => {
-				//assert.equal(null, err);
-				if(err){
-					
-				}
-				if(response == null) {
-					callback(`Not inserted`);
+				//
+				if(err && err.hasOwnProperty(`errmsg`)){
+					callback(err.errmsg);
 				} else {
 					callback(response.result);		
 				}		
