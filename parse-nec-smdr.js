@@ -16,8 +16,8 @@
 
 var rds3000 = true;
 var hds5200 = true;
-var index186bit7 = true;
-var index241bit4 = false;
+var index186bit7 = false;
+var index241bit4 = true;
 var yearPrefix = `20`;
 
  module.exports = {
@@ -284,7 +284,7 @@ var yearPrefix = `20`;
 	parseKA: (smdrObject, callback) => {
 	/*
 		KA RECORD - OUTGOING NORMAL FORMAT
-		Untested
+		Fairly Tested
 	*/
 		smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber = smdrObject.RawSMDR.substring(5,8);
 		smdrObject.OutgoingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
@@ -373,11 +373,7 @@ var yearPrefix = `20`;
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = false;
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = false;
 		}
-		var tempCalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
-		if(tempCalledNumber != ``){
-			smdrObject.ConditionCodes.MeteringPulses = tempCalledNumber;
-		}
-		//smdrObject.DialCode.DialCode = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
+		smdrObject.DialCode.DialCode = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
 		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
 		smdrObject.OfficeCodeInformation.OfficeCodeofCallingParty = smdrObject.RawSMDR.substring(98,102);
 		smdrObject.OfficeCodeInformation.OfficeCodeofBillingProcessOffice = smdrObject.RawSMDR.substring(102,106);
@@ -414,7 +410,7 @@ var yearPrefix = `20`;
 	 parseKB: (smdrObject, callback) => {
 	/*
 		KB RECORD – STATION-TO-STATION NORMAL FORMAT
-		Untested
+		Fairly Tested
 	*/
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.RawSMDR.substring(11,12);
 		if(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode ==`0`){
@@ -424,10 +420,10 @@ var yearPrefix = `20`;
 		}
 		if(!rds3000){
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(62,64);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyTenant = smdrObject.RawSMDR.substring(62,64);
 		} else {
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(70,73);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyTenant = smdrObject.RawSMDR.substring(70,73);
 		}
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/g,``);
 		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
@@ -472,7 +468,7 @@ var yearPrefix = `20`;
 	parseKE: (smdrObject, callback) => {
 	/*
 		KE RECORD – INCOMING NORMAL FORMAT
-		Untested
+		Fairly Tested
 	*/
 		smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber = smdrObject.RawSMDR.substring(5,8);
 		smdrObject.IncomingTrunk.TrunkNumber = smdrObject.RawSMDR.substring(8,11);
@@ -554,16 +550,13 @@ var yearPrefix = `20`;
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.Used.PhysicalRouteNumber = false;
 			smdrObject.AlternateRoutingInformationIncomingRouteNumber.FirstSelected.PhysicalRouteNumber = false;
 		}
-		var tempCalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
-		if(tempCalledNumber != ``){
-			smdrObject.ConditionCodes.MeteringPulses = tempCalledNumber;
-		}
+		smdrObject.DialCode.DialCode = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
 		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
 		if(index186bit7){
 			smdrObject.OfficeCodeInformation.OfficeCodeofCallingParty = smdrObject.RawSMDR.substring(98,102);
 			smdrObject.OfficeCodeInformation.OfficeCodeofBillingProcessOffice = smdrObject.RawSMDR.substring(102,106);
 		} else if(index241bit4) {
-			smdrObject.CallingStationNumber.CallingPartyNumber = smdrObject.RawSMDR.substring(98,106);
+			smdrObject.CallingStationNumber.CallingPartyNumber = smdrObject.RawSMDR.substring(98,116).replace(/\s/g,``);
 		}
 		smdrObject.ConditionCodes.ConditionC.ChargeInformationCode = smdrObject.RawSMDR.substring(120,121);	
 		switch(smdrObject.ConditionCodes.ConditionC.ChargeInformationCode) {
@@ -697,9 +690,8 @@ var yearPrefix = `20`;
 		}
 		var tempCalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
 		if(tempCalledNumber != ``){
-			smdrObject.ConditionCodes.MeteringPulses = tempCalledNumber;
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber  = tempCalledNumber;
 		}
-		//smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
 		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
 		if(index186bit7){
 			smdrObject.OfficeCodeInformation.OfficeCodeofCallingParty = smdrObject.RawSMDR.substring(98,102);
@@ -848,7 +840,7 @@ var yearPrefix = `20`;
 		}
 		var tempCalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);
 		if(tempCalledNumber != ``){
-			smdrObject.ConditionCodes.MeteringPulses = tempCalledNumber;
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = tempCalledNumber;
 		}
 		//smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(62,86).replace(/\s/g,``);	
 		smdrObject.ConditionCodes.MeteringPulses = smdrObject.RawSMDR.substring(94,98);
@@ -923,10 +915,10 @@ var yearPrefix = `20`;
 		}
 		if(!rds3000){
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(12,14);
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(62,64);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyTenant = smdrObject.RawSMDR.substring(62,64);
 		} else {
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(70,73);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyTenant = smdrObject.RawSMDR.substring(70,73);
 		}
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/g,``);
 		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
@@ -1062,12 +1054,12 @@ var yearPrefix = `20`;
 			smdrObject.CalledPartyInformation.PhysicalNumber.KindofData = `Called Party Information (Physical number)`;
 			smdrObject.CalledPartyInformation.PhysicalNumber.LengthofData = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2);
 			variableCharacter+=2;
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+1);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyIdentificationCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+1);
 			variableCharacter+=1;
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyIdentification = module.exports.getCPIType(smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyIdentification = module.exports.getCPIType(smdrObject.CalledPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyTenant = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 			variableCharacter+=3;
-			smdrObject.CalledPartyInformation.PhysicalNumber.CallingNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+6).replace(/\s/g,``);
+			smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+6).replace(/\s/g,``);
 			variableCharacter+=6;	
 			smdrObject.ProcessingSMDR = smdrObject.ProcessingSMDR.substring(variableCharacter,smdrObject.ProcessingSMDR.length);
 		}
@@ -1407,6 +1399,7 @@ var yearPrefix = `20`;
 	parseKK: (smdrObject, callback) => {
 	/*
 		KK RECORD – OUTGOING FLEXIBLE FORMAT
+		Fairly Tested
 	*/
 		smdrObject.ProcessingSMDR = smdrObject.RawSMDR.substring(5, smdrObject.length)
 		
@@ -1479,6 +1472,7 @@ var yearPrefix = `20`;
 	parseKL: (smdrObject, callback) => {
 	/*
 		KL RECORD – INCOMING FLEXIBLE FORMAT
+		Fairly Tested
 	*/
 		smdrObject.ProcessingSMDR = smdrObject.RawSMDR.substring(5, smdrObject.length)
 		
@@ -1545,6 +1539,7 @@ var yearPrefix = `20`;
 	parseKM:(smdrObject, callback) => {
 	/*
 		KM RECORD – STATION-TO-STATION FLEXIBLE FORMAT
+		Fairly Tested
 	*/
 		smdrObject.ProcessingSMDR = smdrObject.RawSMDR.substring(5, smdrObject.length)
 		// 02 Calling Party Information (Physical Number)

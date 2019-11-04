@@ -39,175 +39,193 @@ var 	searchQuery = {},
 		dbFunctions.getNotifyInfo( (documents) => {
 				if(documents != null){
 					documents.forEach( (document) => {
-						var emailContent = ``;
-						var emailSubject = `Call Notification: ` + document[`Rule Name`];
-						if(document.hasOwnProperty(`Email HTML`)){
-							var emailContentType = `html`;
-						} else if(document.hasOwnProperty(`Email Text`)){
-							var emailContentType = `text`;
-						}
-						var notify = false;
-						if(physicalNumber && smdrObject.CallingPartyInformation.PhysicalNumber.hasOwnProperty(`CallingPartyTenant`)){
-							var tenant = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant) || false;
-							var callingNumber = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber) || false;
-							var calledNumber = parseInt(smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber) || false;
-							if(smdrObject.OutgoingTrunk.hasOwnProperty(`PhysicalOutgoingRouteNumber`) && smdrObject.OutgoingTrunk.hasOwnProperty(`TrunkNumber`)){
-								var outRoute = parseInt(smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber);
-								var outTrunk = parseInt(smdrObject.OutgoingTrunk.TrunkNumber);
-							} else {
-								var outRoute = false;
-								var outTrunk = false;
+						if(document.hasOwnProperty(`Enabled`) && document.Enabled){
+							var emailContent = ``;
+							var emailSubject = `Call Notification: ` + document[`Rule Name`];
+							if(document.hasOwnProperty(`Email HTML`)){
+								var emailContentType = `html`;
+							} else if(document.hasOwnProperty(`Email Text`)){
+								var emailContentType = `text`;
 							}
-						} else {
-							var tenant = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingPartyTenant)  || 0;
-							var callingNumber = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingNumber) || false;
-							var calledNumber = parseInt(smdrObject.CalledPartyInformation.TelephoneNumber.CalledNumber) || false;
-						}
-						if(callingNumber){
-							if(emailContentType == `text`){
-								emailContent += `Calling Station: ` + callingNumber + `\n`;
+							var notify = false;
+							if(physicalNumber && smdrObject.CallingPartyInformation.PhysicalNumber.hasOwnProperty(`CallingPartyTenant`)){
+								var tenant = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant) || false;
+								var callingNumber = parseInt(smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber) || false;
+								var calledNumber = parseInt(smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber) || false;
+								if(smdrObject.OutgoingTrunk.hasOwnProperty(`PhysicalOutgoingRouteNumber`) && smdrObject.OutgoingTrunk.hasOwnProperty(`TrunkNumber`)){
+									var outRoute = parseInt(smdrObject.OutgoingTrunk.PhysicalOutgoingRouteNumber);
+									var outTrunk = parseInt(smdrObject.OutgoingTrunk.TrunkNumber);
+								} else {
+									var outRoute = false;
+									var outTrunk = false;
+								}
+								if(smdrObject.IncomingTrunk.hasOwnProperty(`PhysicalIncomingRouteNumber`) && smdrObject.IncomingTrunk.hasOwnProperty(`TrunkNumber`)){
+									var inRoute = parseInt(smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber);
+									var inTrunk = parseInt(smdrObject.IncomingTrunk.TrunkNumber);
+								} else {
+									var inRoute = false;
+									var inTrunk = false;
+								}
 							} else {
-								emailContent += `<p>Calling Station: ` + callingNumber + `</p>`;
+								var tenant = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingPartyTenant)  || 0;
+								var callingNumber = parseInt(smdrObject.CallingPartyInformation.TelephoneNumber.CallingNumber) || false;
+								var calledNumber = parseInt(smdrObject.CalledPartyInformation.TelephoneNumber.CalledNumber) || false;
 							}
-						}
-						if(document.hasOwnProperty(`Tenant`)){
-							if(document.Tenant == tenant){
-								notify = true;				
+							if(callingNumber){
 								if(emailContentType == `text`){
-									emailContent += `Tenant Number: ` + tenant + `\n`;
+									emailContent += `Calling Station: ` + callingNumber + `\n`;
 								} else {
-									emailContent += `<p>Tenant Number: ` + tenant + `</p>`;
+									emailContent += `<p>Calling Station: ` + callingNumber + `</p>`;
 								}
-							} else {
-								notify = false;
 							}
-						}
-						if(document.hasOwnProperty(`MAID`)){
-							if(smdrObject.MAID.hasOwnProperty(`CallingPartyMAID`)){
-								notify = true;		
-								if(emailContentType == `text`){
-									emailContent += `Message Area ID: ` + smdrObject.MAID.CallingPartyMAID + `\n`;
+							
+							if(document.hasOwnProperty(`Tenant`)){
+								if(document.Tenant == tenant){
+									notify = true;				
+									if(emailContentType == `text`){
+										emailContent += `Tenant Number: ` + tenant + `\n`;
+									} else {
+										emailContent += `<p>Tenant Number: ` + tenant + `</p>`;
+									}
 								} else {
-									emailContent += `<p>Message Area ID: ` + smdrObject.MAID.CallingPartyMAID + `</p>`;
+									notify = false;
 								}
-							} else {
-								notify = false;
-							}	
-						}
-						if(document.hasOwnProperty(`Dialed Number`)){
-							if(smdrObject.DialCode.hasOwnProperty(`DialCode`) && document[`Dialed Number`] ==  smdrObject.DialCode.DialCode){
-								notify = true;	
-								if(emailContentType == `text`){
-									emailContent += `Dialed Number: ` + smdrObject.DialCode.DialCode + `\n`;
+							}
+							if(document.hasOwnProperty(`MAID`)){
+								if(smdrObject.MAID.hasOwnProperty(`CallingPartyMAID`)){
+									notify = true;		
+									if(emailContentType == `text`){
+										emailContent += `Message Area ID: ` + smdrObject.MAID.CallingPartyMAID + `\n`;
+									} else {
+										emailContent += `<p>Message Area ID: ` + smdrObject.MAID.CallingPartyMAID + `</p>`;
+									}
 								} else {
-									emailContent += `<p>Dialed Number: ` + smdrObject.DialCode.DialCode + `</p>`;
-								}
-								if(outRoute && outTrunk){
-									if(emailContentType == `text`){
-										emailContent += `Route : ` + outRoute + `\n`;
-										emailContent += `Trunk : ` + outTrunk + `\n`;
-									} else {
-										emailContent += `<p>Route: ` + outRoute + `</p>`;
-										emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
-									}
-								}
-							} else {
-								notify = false;
-							}			
-						}
-						if(document.hasOwnProperty(`Calling Station`)){
-							if(callingNumber != undefined && document[`Calling Station`] ==  callingNumber){
-								notify = true;
-								if(outRoute && outTrunk){
-									if(emailContentType == `text`){
-										emailContent += `Route : ` + outRoute + `\n`;
-										emailContent += `Trunk : ` + outTrunk + `\n`;
-									} else {
-										emailContent += `<p>Route: ` + outRoute + `</p>`;
-										emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
-									}
-								}
-								if(calledNumber){				
-									if(emailContentType == `text`){
-										emailContent += `Called Station: ` + calledNumber + `\n`;
-									} else {
-										emailContent += `<p>Called Station: ` + calledNumber + `</p>`;
-									}
-								}
-								if(smdrObject.DialCode.hasOwnProperty(`DialCode`)){
+									notify = false;
+								}	
+							}
+							if(document.hasOwnProperty(`Dialed Number`)){
+								if(smdrObject.DialCode.hasOwnProperty(`DialCode`) && document[`Dialed Number`] ==  smdrObject.DialCode.DialCode){
+									notify = true;	
 									if(emailContentType == `text`){
 										emailContent += `Dialed Number: ` + smdrObject.DialCode.DialCode + `\n`;
 									} else {
 										emailContent += `<p>Dialed Number: ` + smdrObject.DialCode.DialCode + `</p>`;
 									}
-								}
-									
-							} else {
-								notify = false;
-							}
-						}
-						if(document.hasOwnProperty(`Called Station`)){
-							if(calledNumber){
-								notify = true;
-								
-								if(emailContentType == `text`){
-									emailContent += `Called Station: ` + calledNumber + `\n`;
+									if(outRoute && outTrunk){
+										if(emailContentType == `text`){
+											emailContent += `Route : ` + outRoute + `\n`;
+											emailContent += `Trunk : ` + outTrunk + `\n`;
+										} else {
+											emailContent += `<p>Route: ` + outRoute + `</p>`;
+											emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+										}
+									}
 								} else {
-									emailContent += `<p>Called Station: ` + calledNumber + `</p>`;
-								}
-							} else {
-								notify = false;
+									notify = false;
+								}			
 							}
-						}
-						if(document.hasOwnProperty(`Route`)){
-							if(document.Route == outRoute){
-								notify = true;
-								
-								if(emailContentType == `text`){
-									emailContent += `Route: ` + outRoute + `\n`;
+							if(document.hasOwnProperty(`Calling Station`)){
+								if(document[`Calling Station`] ==  callingNumber){
+									notify = true;
+									if(outRoute && outTrunk){
+										if(emailContentType == `text`){
+											emailContent += `Route : ` + outRoute + `\n`;
+											emailContent += `Trunk : ` + outTrunk + `\n`;
+										} else {
+											emailContent += `<p>Route: ` + outRoute + `</p>`;
+											emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+										}
+									}
+									if(calledNumber){				
+										if(emailContentType == `text`){
+											emailContent += `Called Station: ` + calledNumber + `\n`;
+										} else {
+											emailContent += `<p>Called Station: ` + calledNumber + `</p>`;
+										}
+									}
+									if(smdrObject.DialCode.hasOwnProperty(`DialCode`)){
+										if(emailContentType == `text`){
+											emailContent += `Dialed Number: ` + smdrObject.DialCode.DialCode + `\n`;
+										} else {
+											emailContent += `<p>Dialed Number: ` + smdrObject.DialCode.DialCode + `</p>`;
+										}
+									}
 								} else {
-									emailContent += `<p>Route: ` + outRoute + `</p>`;
+									notify = false;
 								}
-							} else {
-								notify = false;
 							}
-						}
-						if(document.hasOwnProperty(`Trunk`)){
-							if(document.Trunk == outTrunk){
-								notify = true;
-								
-								if(emailContentType == `text`){
-									emailContent += `Trunk: ` + outTrunk + `\n`;
+							if(document.hasOwnProperty(`Called Station`)){		
+								if(document[`Called Station`] == calledNumber){
+									notify = true;
+									if(emailContentType == `text`){
+										emailContent += `Called Station: ` + calledNumber + `\n`;
+										if(inRoute && inTrunk){
+											emailContent += `Route : ` + inRoute + `\n`;
+											emailContent += `Trunk : ` + inTrunk + `\n`
+										}			
+									} else {
+										emailContent += `<p>Called Station: ` + calledNumber + `</p>`;
+										if(inRoute && inTrunk){
+											emailContent += `<p>Route: ` + inRoute + `</p>`;
+											emailContent += `<p>Trunk: ` + inTrunk + `</p>`;
+										}
+									}
+									if(smdrObject.CallingStationNumber.hasOwnProperty(`CallingPartyNumber`)){
+										if(emailContentType == `text`){
+											emailContent += `Calling Number: ` + smdrObject.CallingStationNumber.CallingPartyNumber + `\n`;
+										} else {
+											emailContent += `<p>Calling Number: ` + smdrObject.CallingStationNumber.CallingPartyNumber + `</p>`;
+										}
+									}									
 								} else {
-									emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+									notify = false;
 								}
-							} else {
-								notify = false;
 							}
-						}
-						if(emailContentType == `html`){
-							emailContent += document[`Email HTML`];
-						} else if(emailContentType == `text` && document.hasOwnProperty(`Email Text`)) {
-							document[`Email Text`].forEach( (contentLine) => { 
-								emailContent += contentLine + `\n`;
-							});
-						}
-						if(notify){
-							console.log(emailContent);
-							console.log(emailContent);
-							if(document.hasOwnProperty(`Notify List`) && emailContentType != undefined){
-								document[`Notify List`].forEach( (emailAddress) => {
-									module.exports.sendMail(emailAddress, emailSubject, emailContentType, emailContent, (emailResponse) => {
-										console.log(emailResponse);
-									});
+							if(document.hasOwnProperty(`Route`)){
+								if(document.Route == outRoute){
+									notify = true;
+									if(emailContentType == `text`){
+										emailContent += `Route: ` + outRoute + `\n`;
+									} else {
+										emailContent += `<p>Route: ` + outRoute + `</p>`;
+									}
+								} else {
+									notify = false;
+								}
+							}
+							if(document.hasOwnProperty(`Trunk`)){
+								if(document.Trunk == outTrunk){
+									notify = true;
+									if(emailContentType == `text`){
+										emailContent += `Trunk: ` + outTrunk + `\n`;
+									} else {
+										emailContent += `<p>Trunk: ` + outTrunk + `</p>`;
+									}
+								} else {
+									notify = false;
+								}
+							}
+							if(emailContentType == `html`){
+								emailContent += document[`Email HTML`];
+							} else if(emailContentType == `text` && document.hasOwnProperty(`Email Text`)) {
+								document[`Email Text`].forEach( (contentLine) => { 
+									emailContent += contentLine + `\n`;
 								});
 							}
-							callback(document[`Rule Name`]);
-						} else {
-							callback(null);
-						}
-						
-						
+							if(notify && typeof(document[`Notify List`]) == `object`){
+								console.log(emailContent);
+								if(document.hasOwnProperty(`Notify List`) && emailContentType != undefined){
+									document[`Notify List`].forEach( (emailAddress) => {
+										module.exports.sendMail(emailAddress, emailSubject, emailContentType, emailContent, (emailResponse) => {
+											console.log(emailResponse);
+										});
+									});
+								}
+								callback(document[`Rule Name`]);
+							} else {
+								callback(null);
+							}
+						}		
 					});
 				}
 			});

@@ -51,15 +51,12 @@ const	assert = require(`assert`),
 	},
 	 
 	insertSMDRRecord: (smdrRecord, callback) => {
-		smdrRecord[`_id`] = smdrRecord.RawSMDR;
+		smdrRecord[`_id`] = smdrRecord.RawSMDR.replace(/\s/g,``);
 		mongoClient(function(err, client){
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).insertOne( smdrRecord, (err, response) => {
 				//
-				if(err){
-					
-				}
-				if(response == null) {
-					callback(`Not inserted`);
+				if(err && err.hasOwnProperty(`errmsg`)){
+					callback(err.errmsg);
 				} else {
 					callback(response.result);		
 				}		
