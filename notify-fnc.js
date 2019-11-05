@@ -13,6 +13,7 @@
 		
 		See LICENSE file for more information.
 */
+
 require(`dotenv`).config();
 const 	physicalNumber = process.env.USE_PHYSICAL_NUMBER;
 		dbFunctions = require(`./mongo-db.js`),
@@ -156,6 +157,9 @@ var 	searchQuery = {},
 							}
 							if(document.hasOwnProperty(`Called Station`)){		
 								if(document[`Called Station`] == calledNumber){
+									dbFunctions.getDeviceName(document[`Called Station`], (response) => {
+										console.log(response);
+									});
 									notify = true;
 									if(emailContentType == `text`){
 										emailContent += `Called Station: ` + calledNumber + `\n`;

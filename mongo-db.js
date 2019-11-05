@@ -19,6 +19,18 @@ const	assert = require(`assert`),
 		mongoClient = require(`./mongoClient.js`);
  
  module.exports = {
+	 getDeviceName: (deviceExtension, callback) => {
+		 mongoClient(function(err, client){
+			client.db(process.env.MONGO_DATABASE).collection(`Device Information`).findOne( { "_id" : deviceExtension }, (err, document) => {
+				console.log(document);
+				if(err && err.hasOwnProperty(`errmsg`)){
+					callback(err.errmsg);
+				} else {
+					callback(document);		
+				}		
+			});
+		});
+	 },
 	
 	getNotifyInfo: (callback) => {
 		mongoClient(function(err, client){

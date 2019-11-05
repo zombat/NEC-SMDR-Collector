@@ -1,0 +1,13 @@
+1:	Clone or download Git repo.
+2:	Install Node.js 12.x
+3:	Install MongoDB 4.x or higher.
+4:	CD to SMDR directory.
+5:	Run npm install --save
+6:	Create .env file based on example.env (skip user and password for now)
+7:	Program PBX SMDR (parity off)
+8: 	Test
+9:	Edit initialSetup.js and add your site specific information
+10:	Edit .env file and add smdr mongo user and password
+11:	Secure MongoDB with initialSetup.js by passing it as an argument to the mongo shell
+12:	Test
+13: Optionally: configure and test notifications.

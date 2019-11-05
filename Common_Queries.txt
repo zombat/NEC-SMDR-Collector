@@ -31,3 +31,5 @@ Calls to specific station (FCCS):
 All station calls from specific FPC:
 	{ $or: [{ 'CallingPartyInformation.TelephoneNumber.LogicalNumber': { $exists : true } }, { 'CallingPartyInformation.TelephoneNumber.FusionPointCode' : `001` } ] }
 
+Count incoming calls on specific route (Non-FCCS):
+db[`smdr-collection`].find( { "IncomingTrunk.PhysicalIncomingRouteNumber" : "010" } ).count()
