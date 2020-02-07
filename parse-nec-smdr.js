@@ -426,14 +426,14 @@ var yearPrefix = `20`;
 			smdrObject.CalledPartyInformation.PhysicalNumber.CalledPartyTenant = smdrObject.RawSMDR.substring(70,73);
 		}
 		smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/g,``);
-		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
+		smdrObject.CallTime.Start.Year = parseInt(yearPrefix + smdrObject.RawSMDR.substring(116,118));
 		smdrObject.CallTime.Start.Month =  parseInt(smdrObject.RawSMDR.substring(20,22));
 		smdrObject.CallTime.Start.Day =  parseInt(smdrObject.RawSMDR.substring(22,24));
 		smdrObject.CallTime.Start.Hour =  parseInt(smdrObject.RawSMDR.substring(24,26));
 		smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.RawSMDR.substring(26,28));
 		smdrObject.CallTime.Start.Second =  parseInt(smdrObject.RawSMDR.substring(28,30));
 		if(hds5200){
-			smdrObject.CallTime.End.Year = parseInt(smdrObject.RawSMDR.substring(118,120));
+			smdrObject.CallTime.End.Year = parseInt(yearPrefix + smdrObject.RawSMDR.substring(118,120));
 		} else {
 			smdrObject.CallTime.End.Year = smdrObject.CallTime.Start.Year;
 		}
@@ -480,14 +480,14 @@ var yearPrefix = `20`;
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.RawSMDR.substring(50,53);	
 		}
 		smdrObject.CalledPartyInformation.PhysicalNumber.CalledNumber = smdrObject.RawSMDR.substring(14,20).replace(/\s/g,``);		
-		smdrObject.CallTime.Start.Year = parseInt(smdrObject.RawSMDR.substring(116,118));
+		smdrObject.CallTime.Start.Year = parseInt(yearPrefix + smdrObject.RawSMDR.substring(116,118));
 		smdrObject.CallTime.Start.Month =  parseInt(smdrObject.RawSMDR.substring(20,22));
 		smdrObject.CallTime.Start.Day =  parseInt(smdrObject.RawSMDR.substring(22,24));
 		smdrObject.CallTime.Start.Hour =  parseInt(smdrObject.RawSMDR.substring(24,26));
 		smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.RawSMDR.substring(26,28));
 		smdrObject.CallTime.Start.Second =  parseInt(smdrObject.RawSMDR.substring(28,30));
 		if(hds5200){
-			smdrObject.CallTime.End.Year = parseInt(smdrObject.RawSMDR.substring(118,120));
+			smdrObject.CallTime.End.Year = parseInt(yearPrefix + smdrObject.RawSMDR.substring(118,120));
 		} else {
 			smdrObject.CallTime.End.Year = smdrObject.CallTime.Start.Year;
 		}
@@ -496,6 +496,8 @@ var yearPrefix = `20`;
 		smdrObject.CallTime.End.Hour =  parseInt(smdrObject.RawSMDR.substring(34,36));
 		smdrObject.CallTime.End.Minute =  parseInt(smdrObject.RawSMDR.substring(36,38));
 		smdrObject.CallTime.End.Second =  parseInt(smdrObject.RawSMDR.substring(38,40));
+		smdrObject.CallTime.Start.TimeStamp = new Date(smdrObject.CallTime.Start.Year, smdrObject.CallTime.Start.Month, smdrObject.CallTime.Start.Day, module.exports.padZero(smdrObject.CallTime.Start.Hour), module.exports.padZero(smdrObject.CallTime.Start.Minute), module.exports.padZero(smdrObject.CallTime.Start.Second));		
+		smdrObject.CallTime.End.TimeStamp = new Date(smdrObject.CallTime.End.Year, smdrObject.CallTime.End.Month, smdrObject.CallTime.End.Day, smdrObject.CallTime.End.Hour, smdrObject.CallTime.End.Minute, smdrObject.CallTime.End.Second);		
 		smdrObject.AccountCode.AccountCode = smdrObject.RawSMDR.substring(40,50).replace(/\s/g,``);
 		smdrObject.ConditionCodes.CodeOneCode =  parseInt(smdrObject.RawSMDR.substring(53,54));
 		if(smdrObject.ConditionCodes.CodeOneCode == 0){

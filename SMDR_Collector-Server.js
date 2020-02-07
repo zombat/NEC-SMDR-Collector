@@ -39,6 +39,7 @@ var		bufferArray = [];
 		continueInterval = true,
 		reconnectClient = false,
 		enableNotification = true;
+		pauseCollection = false;
 
 const check911 = (smdrObject, callback) => {
 	
@@ -164,6 +165,23 @@ const parseFile = (fileName, callback) => {
 		callback(fileData);
 	});
 }
+
+const rebuildDatabase = ( options , callback) => {
+	dbFunctions.getRecords(null, (smdrRecords) => {
+		var processCount = smdrRecords.length;
+		smdrRecords.forEach( (smdrRecord) => {
+			necSMDR.parseSMDR(smdrRecord.RawSMDR, (smdrObject) => {
+				dbFunctions.updateSMDRRecord(smdrObject, (response) => {
+					logMessage(`in`, `Database Response`, JSON.stringify(response));
+					processCount--;
+					if(processCount == 0){
+						callback();	
+					}
+				});
+			});	
+		});	
+	});
+}
 	
 client.on(`error`, (err) => {
 	// Listen for errs from PBX.
@@ -260,10 +278,19 @@ var intervalRequest = setInterval( () => {
 	// Check for MongoDB connection
 	dbFunctions.serverStatus( (serverStatus) => {
 		if(serverStatus){
-			if(process.env.GET_FILES == `true`){
+			if(process.argv[2] == `--rebuildDatabase` && !pauseCollection){
+				pauseCollection = true;
+				rebuildDatabase( null, () => {
+					console.log(`Database rebuild complete`);
+					process.argv[2] = ``;
+					pauseCollection = false;
+					process.exit(1);
+				});
+			}
+			if(process.env.GET_FILES == `true` && !pauseCollection){
 				getFiles();
 				 clearInterval(intervalRequest);
-			} else if(process.env.GET_NEAX == `true`){
+			} else if(process.env.GET_NEAX == `true` && !pauseCollection){
 				if(reconnectClient){
 					necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
 						reconnectClient = false;
