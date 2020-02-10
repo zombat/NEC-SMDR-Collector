@@ -48,7 +48,10 @@ const	assert = require(`assert`),
 				callback(false);
 			} else {
 				client.db(process.env.MONGO_DATABASE).admin().serverStatus(function(err, status) {
-					if(status.ok){
+					if(err){
+						console.log(err);
+						console.log(`Did you create the MongoDB user correctly?`);
+					} else if(status.ok){
 						callback(true);
 					} else {
 						callback(false);
@@ -66,11 +69,35 @@ const	assert = require(`assert`),
 		smdrRecord[`_id`] = smdrRecord.RawSMDR.replace(/\s/g,``);
 		mongoClient(function(err, client){
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).insertOne( smdrRecord, (err, response) => {
-				//
 				if(err && err.hasOwnProperty(`errmsg`)){
 					callback(err.errmsg);
 				} else {
 					callback(response.result);		
+				}		
+			});
+		});
+	},
+	
+	updateSMDRRecord: (smdrRecord, callback) => {
+		mongoClient(function(err, client){
+			var id = smdrRecord.RawSMDR.replace(/\s/g,``);
+			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).updateOne( { '_id' : id }, { '$set' : smdrRecord }, (err, response) => {
+				if(err && err.hasOwnProperty(`errmsg`)){
+					callback(err.errmsg);
+				} else {
+					callback(response.result);		
+				}		
+			});
+		});
+	},
+	
+	getRecords: ( options, callback) => {
+		mongoClient(function(err, client){
+			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).find({}).toArray( (err, documents) => {
+				if(err && err.hasOwnProperty(`errmsg`)){
+					callback(err.errmsg);
+				} else {
+					callback(documents);		
 				}		
 			});
 		});
