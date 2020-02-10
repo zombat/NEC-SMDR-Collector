@@ -1012,14 +1012,22 @@ var yearPrefix = `20`;
 			smdrObject.CallingPartyInformation.PhysicalNumber.KindofDataCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2);
 			variableCharacter+=2;
 			smdrObject.CallingPartyInformation.PhysicalNumber.KindofData = `Calling Party Information (Physical number)`;
-			smdrObject.CallingPartyInformation.PhysicalNumber.LengthofData = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2);
+			smdrObject.CallingPartyInformation.PhysicalNumber.LengthofData = parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 			variableCharacter+=2;
-			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+1);
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+1);
 			variableCharacter+=1;
+			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentification = module.exports.getCPIType(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode);
 			smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyTenant = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 			variableCharacter+=3;
-			smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+6).replace(/\s/g,``);
-			variableCharacter+=6;
+			if(smdrObject.CallingPartyInformation.PhysicalNumber.CallingPartyIdentificationCode == `2`){
+				smdrObject.IncomingTrunk.PhysicalIncomingRouteNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+3);
+				variableCharacter+=3;
+				smdrObject.IncomingTrunk.TrunkNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+3);
+				variableCharacter+=3;
+			} else {
+				smdrObject.CallingPartyInformation.PhysicalNumber.CallingNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+6).replace(/\s/g,``);
+				variableCharacter+=6;
+			}
 			smdrObject.ProcessingSMDR = smdrObject.ProcessingSMDR.substring(variableCharacter,smdrObject.ProcessingSMDR.length);
 		}
 		callback(smdrObject);	
@@ -1031,7 +1039,6 @@ var yearPrefix = `20`;
 		if(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2) == `03`){
 			smdrObject.CallingPartyInformation.TelephoneNumber.KindofDataCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2);
 			variableCharacter+=2;
-			smdrObject.CallingPartyInformation.TelephoneNumber.KindofData = `Calling Party Number (Telephone Number or Logical Route)`;
 			smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData = parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 			variableCharacter+=2;
 			smdrObject.CallingPartyInformation.TelephoneNumber.FusionPointCode = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
@@ -1039,8 +1046,19 @@ var yearPrefix = `20`;
 			if(smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData != 3){
 				smdrObject.CallingPartyInformation.TelephoneNumber.FusionUserGroupNumber = smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3);
 				variableCharacter +=3;
-				smdrObject.CallingPartyInformation.TelephoneNumber.LogicalNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData-6);
-				variableCharacter += smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData-6;
+				if(smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData == 9){
+					smdrObject.CallingPartyInformation.TelephoneNumber.KindofData = `Calling Party Number (Logical Route)`;
+					smdrObject.IncomingTrunk.LogicalIncomingRouteNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+3);
+					variableCharacter +=3;
+				} else if(smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData < 9){
+					smdrObject.CallingPartyInformation.TelephoneNumber.KindofData = `Calling Party Number (Telephone Number)`;
+					smdrObject.CallingPartyInformation.TelephoneNumber.LogicalNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData-3);
+					variableCharacter += smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData-3;
+				} else {
+					smdrObject.CallingPartyInformation.TelephoneNumber.KindofData = `Calling Party Number (Telephone Number)`;
+					smdrObject.CallingPartyInformation.TelephoneNumber.LogicalNumber = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData-6);
+					variableCharacter += smdrObject.CallingPartyInformation.TelephoneNumber.LengthofData-6;
+				}
 			}
 			smdrObject.ProcessingSMDR = smdrObject.ProcessingSMDR.substring(variableCharacter,smdrObject.ProcessingSMDR.length);
 		}
@@ -1112,10 +1130,10 @@ var yearPrefix = `20`;
 				smdrObject.CallTime.Start.Minute =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 				variableCharacter +=2;
 				smdrObject.CallTime.Start.Second =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
-				smdrObject.CallTime.Start.Second =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 				variableCharacter +=2;
 				smdrObject.CallTime.Start.Millisecond =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3));
 				variableCharacter +=3;		
+				smdrObject.CallTime.Start.TimeStamp = new Date(smdrObject.CallTime.Start.Year, smdrObject.CallTime.Start.Month, smdrObject.CallTime.Start.Day, module.exports.padZero(smdrObject.CallTime.Start.Hour), module.exports.padZero(smdrObject.CallTime.Start.Minute), module.exports.padZero(smdrObject.CallTime.Start.Second));		
 			
 				// Call End Time
 				smdrObject.CallTime.End.Year =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+4));
@@ -1131,7 +1149,11 @@ var yearPrefix = `20`;
 				smdrObject.CallTime.End.Second =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 				variableCharacter +=2;
 				smdrObject.CallTime.End.Millisecond =  parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+3));
-				variableCharacter +=3;	
+				variableCharacter +=3;
+				smdrObject.CallTime.End.TimeStamp = new Date(smdrObject.CallTime.End.Year, smdrObject.CallTime.End.Month, smdrObject.CallTime.End.Day, module.exports.padZero(smdrObject.CallTime.End.Hour), module.exports.padZero(smdrObject.CallTime.End.Minute), module.exports.padZero(smdrObject.CallTime.End.Second));		
+			
+				smdrObject.CallTime.Duration.Milliseconds = smdrObject.CallTime.End.TimeStamp - smdrObject.CallTime.Start.TimeStamp;
+				
 			smdrObject.ProcessingSMDR = smdrObject.ProcessingSMDR.substring(variableCharacter,smdrObject.ProcessingSMDR.length);
 		}
 		callback(smdrObject);
@@ -1213,8 +1235,8 @@ var yearPrefix = `20`;
 			smdrObject.DialCode.KindofData = `Dialed Number`;
 			smdrObject.DialCode.LengthofData = parseInt(smdrObject.ProcessingSMDR.substring(variableCharacter,variableCharacter+2));
 			variableCharacter +=2;
-			smdrObject.DialCode.DialCode = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+smdrObject.DialCode.LengthofData-1);
-			variableCharacter += smdrObject.DialCode.LengthofData-1;
+			smdrObject.DialCode.DialCode = smdrObject.ProcessingSMDR.substring(variableCharacter, variableCharacter+smdrObject.DialCode.LengthofData);
+			variableCharacter += smdrObject.DialCode.LengthofData;
 			smdrObject.ProcessingSMDR = smdrObject.ProcessingSMDR.substring(variableCharacter,smdrObject.ProcessingSMDR.length);	
 		}
 		callback(smdrObject);
