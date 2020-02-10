@@ -17,6 +17,7 @@
 require(`dotenv`).config();
 const	net = require(`net`),
 		client = new net.Socket(),
+		mongoClient = require(`./mongoClient.js`),
 		records = [],
 		buffer = require(`buffer`),
 		path = require(`path`),
@@ -167,19 +168,23 @@ const parseFile = (fileName, callback) => {
 }
 
 const rebuildDatabase = ( options , callback) => {
-	dbFunctions.getRecords(null, (smdrRecords) => {
-		var processCount = smdrRecords.length;
-		smdrRecords.forEach( (smdrRecord) => {
-			necSMDR.parseSMDR(smdrRecord.RawSMDR, (smdrObject) => {
-				dbFunctions.updateSMDRRecord(smdrObject, (response) => {
-					logMessage(`in`, `Database Response`, JSON.stringify(response));
-					processCount--;
-					if(processCount == 0){
-						callback();	
-					}
+	mongoClient(function(err, client){
+		var mongoCursor = 	client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).find( { RawSMDR : { $exists: true }} );
+		var recordCount = mongoCursor.count();
+		recordCount.then((recordCount) => {
+			console.log(`Found ` + recordCount + ` records`);
+			mongoCursor.forEach( (smdrRecord) => {
+				necSMDR.parseSMDR(smdrRecord.RawSMDR, (smdrObject) => {
+					dbFunctions.updateSMDRRecord(smdrObject, (response) => {
+						logMessage(`in`, `Database Response`, JSON.stringify(response));
+						recordCount--;
+						if(recordCount == 0){
+							callback();
+						}
+					});
 				});
 			});	
-		});	
+		});
 	});
 }
 	
@@ -273,46 +278,44 @@ client.on(`close`, () => {
 	logMessage(`other`, `Client`, `Client connection closed`);
 });
 
-var intervalRequest = setInterval( () => {
-	// Main timer loop. 
-	// Check for MongoDB connection
-	dbFunctions.serverStatus( (serverStatus) => {
-		if(serverStatus){
-			if(process.argv[2] == `--rebuildDatabase` && !pauseCollection){
-				pauseCollection = true;
-				rebuildDatabase( null, () => {
-					console.log(`Database rebuild complete`);
-					process.argv[2] = ``;
-					pauseCollection = false;
-					process.exit(1);
-				});
-			}
-			if(process.env.GET_FILES == `true` && !pauseCollection){
-				getFiles();
-				 clearInterval(intervalRequest);
-			} else if(process.env.GET_NEAX == `true` && !pauseCollection){
-				if(reconnectClient){
-					necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
-						reconnectClient = false;
-					});
-				} else if(!continueInterval){
-					clearInterval(intervalRequest);
-				} else if(sendSMDRRequest){
-					necPBX.sendSMDRRequest(smdrConnection, client, (smdrRequestBuffer) => {
-						logMessage(`out`, `SMDR Request`, smdrRequestBuffer);
-					});
-				} else{
-					necPBX.sendStatusMonitor(smdrConnection, client, (statusMonitorBuffer) => {
-						logMessage(`out`, `Status Monitor`, statusMonitorBuffer);
-					});
-					sendSMDRRequest = true;
-				}
-			}
-		} else {
-			logMessage(`other`, `MongoDB`, `Error connecting to MongoDB`);
-		}
+if(process.argv[2] == `--rebuildDatabase`){
+	rebuildDatabase( null, () => {
+		console.log(`Database rebuild complete`);
+		process.exit(1);
 	});
-}, intervalTimer);
+} else {
+	var intervalRequest = setInterval( () => {
+		// Main timer loop. 
+		// Check for MongoDB connection
+		dbFunctions.serverStatus( (serverStatus) => {
+			if(serverStatus){
+				if(process.env.GET_FILES == `true` && !pauseCollection){
+					getFiles();
+					 clearInterval(intervalRequest);
+				} else if(process.env.GET_NEAX == `true` && !pauseCollection){
+					if(reconnectClient){
+						necPBX.connectSMDR(`sv9500`, smdrConnection, client, (response) => {
+							reconnectClient = false;
+						});
+					} else if(!continueInterval){
+						clearInterval(intervalRequest);
+					} else if(sendSMDRRequest){
+						necPBX.sendSMDRRequest(smdrConnection, client, (smdrRequestBuffer) => {
+							logMessage(`out`, `SMDR Request`, smdrRequestBuffer);
+						});
+					} else{
+						necPBX.sendStatusMonitor(smdrConnection, client, (statusMonitorBuffer) => {
+							logMessage(`out`, `Status Monitor`, statusMonitorBuffer);
+						});
+						sendSMDRRequest = true;
+					}
+				}
+			} else {
+				logMessage(`other`, `MongoDB`, `Error connecting to MongoDB`);
+			}
+		});
+	}, intervalTimer);
+}
 
 if(process.env.GET_NEAX){
 reconnectClient = true;

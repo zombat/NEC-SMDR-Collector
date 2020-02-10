@@ -91,9 +91,9 @@ const	assert = require(`assert`),
 		});
 	},
 	
-	getRecords: ( options, callback) => {
+	getRecords: ( skipAmount, callback) => {
 		mongoClient(function(err, client){
-			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).find({}).toArray( (err, documents) => {
+			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).find({}).skip(skipAmount).toArray( (err, documents) => {
 				if(err && err.hasOwnProperty(`errmsg`)){
 					callback(err.errmsg);
 				} else {
