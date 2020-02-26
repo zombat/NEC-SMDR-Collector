@@ -31,9 +31,12 @@ const 	physicalNumber = process.env.USE_PHYSICAL_NUMBER;
 				rejectUnauthorized : process.env.SMTP_SERVER_REJECT_CERTS
 			}
 			}),
-		fromString = `"` + process.env.SMTP_SERVER_USER_FRIENDLY + `" <` + process.env.SMTP_SERVER_USER + `>` ;
+		fromString = `"` + process.env.SMTP_SERVER_USER_FRIENDLY + `" <` + process.env.SMTP_SERVER_USER + `>`;
 var 	searchQuery = {},
 		queryTest = true;
+
+ 
+ 
  
  module.exports = {
 	processNotification: (smdrObject, callback) => {

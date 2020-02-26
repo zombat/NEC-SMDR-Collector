@@ -1,5 +1,5 @@
 /*
-	Mongo functions.
+	Mongo s.
 */
 
 /*
@@ -20,7 +20,7 @@ const	assert = require(`assert`),
  
  module.exports = {
 	 getDeviceName: (deviceExtension, callback) => {
-		 mongoClient(function(err, client){
+		 mongoClient((err, client) => {
 			client.db(process.env.MONGO_DATABASE).collection(`Device Information`).findOne( { "_id" : deviceExtension }, (err, document) => {
 				console.log(document);
 				if(err && err.hasOwnProperty(`errmsg`)){
@@ -33,7 +33,7 @@ const	assert = require(`assert`),
 	 },
 	
 	getNotifyInfo: (callback) => {
-		mongoClient(function(err, client){
+		mongoClient((err, client) => {
 			client.db(process.env.MONGO_DATABASE).collection(`Notification Settings`).find({}).toArray((err, documents) => {
 					assert.equal(null, err);
 					callback(documents);		
@@ -47,7 +47,7 @@ const	assert = require(`assert`),
 			if(err){
 				callback(false);
 			} else {
-				client.db(process.env.MONGO_DATABASE).admin().serverStatus(function(err, status) {
+				client.db(process.env.MONGO_DATABASE).admin().serverStatus((err, status) => {
 					if(err){
 						console.log(err);
 						console.log(`Did you create the MongoDB user correctly?`);
@@ -67,7 +67,7 @@ const	assert = require(`assert`),
 	 
 	insertSMDRRecord: (smdrRecord, callback) => {
 		smdrRecord[`_id`] = smdrRecord.RawSMDR.replace(/\s/g,``);
-		mongoClient(function(err, client){
+		mongoClient((err, client) => {
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).insertOne( smdrRecord, (err, response) => {
 				if(err && err.hasOwnProperty(`errmsg`)){
 					callback(err.errmsg);
@@ -79,7 +79,7 @@ const	assert = require(`assert`),
 	},
 	
 	updateSMDRRecord: (smdrRecord, callback) => {
-		mongoClient(function(err, client){
+		mongoClient((err, client) => {
 			var id = smdrRecord.RawSMDR.replace(/\s/g,``);
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).updateOne( { '_id' : id }, { '$set' : smdrRecord }, (err, response) => {
 				if(err && err.hasOwnProperty(`errmsg`)){
@@ -92,7 +92,7 @@ const	assert = require(`assert`),
 	},
 	
 	getRecords: ( skipAmount, callback) => {
-		mongoClient(function(err, client){
+		mongoClient((err, client) => {
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).find({}).skip(skipAmount).toArray( (err, documents) => {
 				if(err && err.hasOwnProperty(`errmsg`)){
 					callback(err.errmsg);
@@ -104,7 +104,7 @@ const	assert = require(`assert`),
 	},
 	
 	createDates: (smdrRecord, callback) => {
-		mongoClient(function(err, client){
+		mongoClient((err, client) => {
 			var dateString = smdrRecord.CallTime.Start.Year + `-` + smdrRecord.CallTime.Start.Month + `-` + smdrRecord.CallTime.Start.Day + `T` + smdrRecord.CallTime.Start.Hour + `:` + smdrRecord.CallTime.Start.Minute + `:` + smdrRecord.CallTime.Start.Second + `:` + smdrRecord.CallTime.Start.Millisecond;
 			client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).updateOne( { '_id': smdrRecord.RawSMDR }, { $set: { $dateFromString: {'dateString': dateString } } }, (err, response) => {
 				assert.equal(null, err);

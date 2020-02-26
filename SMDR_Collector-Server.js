@@ -171,6 +171,7 @@ const rebuildDatabase = ( options , callback) => {
 	mongoClient(function(err, client){
 		var mongoCursor = 	client.db(process.env.MONGO_DATABASE).collection(process.env.MONGO_COLLECTION).find( { RawSMDR : { $exists: true }} );
 		var recordCount = mongoCursor.count();
+		mongoCursor.batchSize(20);
 		recordCount.then((recordCount) => {
 			console.log(`Found ` + recordCount + ` records`);
 			mongoCursor.forEach( (smdrRecord) => {
@@ -283,6 +284,10 @@ if(process.argv[2] == `--rebuildDatabase`){
 		console.log(`Database rebuild complete`);
 		process.exit(1);
 	});
+} else if (process.argv[2]) {
+		console.log(`Optional flags are:`);
+		console.log(`\t--rebuildDatabase\t: This will upgrade existing database entries to the latest schema.`);
+		process.exit(1);
 } else {
 	var intervalRequest = setInterval( () => {
 		// Main timer loop. 

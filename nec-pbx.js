@@ -57,9 +57,6 @@
 				deviceNumber = `0x33`;
 				break;
 		};
-			
-		//if(deviceNumber == `0`){
-		//	deviceNumber = `0x30`;
 			switch(sequenceNumber) {
 					case 0:
 						var parityByte = `0x36`;
@@ -104,54 +101,6 @@
 					default:
 						break;
 			};
-		/* } else if(deviceNumber == `1`){
-			deviceNumber = `0x31`;
-			switch(sequenceNumber) {
-					case 0:
-						var parityByte = `0x33`;
-						sequenceNumber = `0x30`;
-						break;
-					case 1:
-						var parityByte = `0x34`;
-						sequenceNumber = `0x31`;
-						break;
-					case 2:
-						var parityByte = `0x34`;
-						sequenceNumber = `0x32`;
-						break;
-					case 3:
-						var parityByte = `0x35`;
-						sequenceNumber = `0x33`;
-						break;
-					case 4:
-						var parityByte = `0x32`;
-						sequenceNumber = `0x34`;
-						break;
-					case 5:
-						var parityByte = `0x33`;
-						sequenceNumber = `0x35`;
-						break;
-					case 6:
-						var parityByte = `0x30`;
-						sequenceNumber = `0x36`;
-						break;
-					case 7:
-						var parityByte = `0x31`;
-						sequenceNumber = `0x37`;
-						break;
-					case 8:
-						var parityByte = `0x3E`;
-						sequenceNumber = `0x38`;
-						break;
-					case 9:
-						var parityByte = `0x3F`;
-						sequenceNumber = `0x39`;
-						break;
-					default:
-						break;
-			};
-		}
-		*/
 		var bufferArray = [0x16, identifierKind, 0x30, 0x30, 0x30, 0x30, 0x34, 0x30, deviceNumber, sequenceNumber , 0x06, parityByte]
 		var responseBuffer = new Buffer.from(bufferArray);
 		client.write(responseBuffer);
