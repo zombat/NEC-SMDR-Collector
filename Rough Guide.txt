@@ -10,4 +10,9 @@
 10:	Edit .env file and add smdr mongo user and password
 11:	Secure MongoDB with initialSetup.js by passing it as an argument to the mongo shell
 12:	Test
-13: Optionally: configure and test notifications.
+13: Optionally: Configure and test notifications.
+14: Optionally: Enable MUX Server and MUX Device numbers that will be used.
+15: Optionally: Run node SMDR_Collector-Server.js --populateHistoricData [0-3] for the device that you would like to provide all pre-existing for.
+
+Remember: Any time you upgrade, run node SMDR_Collector-Server.js --rebuldDatabase to ensure database is at the latest schema.
+Remember: Don't forget backups.
