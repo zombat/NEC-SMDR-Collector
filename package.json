@@ -1,6 +1,6 @@
 {
   "name": "nec-smdr-collector",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "Node.js based SMDR collector for NEAX formatted SMDR that uploads data to MongoDB.",
   "main": "SMDR_Collector-Server.js",
   "scripts": {
@@ -26,10 +26,10 @@
   "homepage": "https://github.com/zombat/NEC-SMDR-Collector#readme",
   "dependencies": {
     "assert": "^2.0.0",
-    "buffer": "^5.4.3",
+    "buffer": "^5.5.0",
     "dotenv": "^8.2.0",
-    "mongodb": "^3.5.2",
-    "nodemailer": "^6.4.2",
+    "mongodb": "^3.5.4",
+    "nodemailer": "^6.4.4",
     "saslprep": "^1.0.3"
   }
 }

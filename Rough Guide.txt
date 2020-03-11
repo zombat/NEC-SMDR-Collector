@@ -1,3 +1,6 @@
+
+NOTICE IF UPGRADING: Thoroughly check all .env values in new example.env file, and make changes accordingly.
+
 1:	Clone or download Git repo.
 2:	Install Node.js 12.x
 3:	Install MongoDB 4.x or higher.

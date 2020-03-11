@@ -14,15 +14,18 @@
 		See LICENSE file for more information.
 */
  
+ const helperFunctions = require(`./helper-functions.js`);
+ 
  module.exports = {
 	 
 	connectSMDR: (connectionType, smdrConnection, client, callback) => {
 	// Connect to PBX for SMDR
 		if(connectionType == `sv9500`){
-			console.log(`Connecting to ` + connectionType + ` SMDR device ` + smdrConnection.device + ` at ` + smdrConnection.ipAddress + ` on port ` + smdrConnection.port);
-			client.connect(smdrConnection.port, smdrConnection.ipAddress, (response) => { 
-				
+			helperFunctions.logMessage(`other`, `SMDR Client`, `Device set to: ` + smdrConnection.device);
+			helperFunctions.logMessage(`out`, `SMDR Client`, `Attempting to connect to ` + smdrConnection.ipAddress + `:` + smdrConnection.port + `...`);
+			client.connect(smdrConnection.port, smdrConnection.ipAddress, (err, response) => { 	
 				callback(response);
+				console.log(err || response);
 			});
 		}
 	},

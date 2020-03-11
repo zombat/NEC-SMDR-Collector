@@ -33,3 +33,5 @@ All station calls from specific FPC:
 
 Count incoming calls on specific route (Non-FCCS):
 db[`smdr-collection`].find( { "IncomingTrunk.PhysicalIncomingRouteNumber" : "010" } ).count()
+
+

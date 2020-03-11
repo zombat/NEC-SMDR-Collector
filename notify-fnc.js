@@ -39,8 +39,8 @@ var 	searchQuery = {},
  
  
  module.exports = {
-	processNotification: (smdrObject, callback) => {
-		dbFunctions.getNotifyInfo( (documents) => {
+	processNotification: (smdrObject, clientSession, callback) => {
+		dbFunctions.getNotifyInfo(clientSession, (documents) => {
 				if(documents != null){
 					documents.forEach( (document) => {
 						if(document.hasOwnProperty(`Enabled`) && document.Enabled){
