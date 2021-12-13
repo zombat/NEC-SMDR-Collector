@@ -29,7 +29,7 @@
     "buffer": "^5.5.0",
     "dotenv": "^8.2.0",
     "mongodb": "^3.5.4",
-    "nodemailer": "^6.4.4",
+    "nodemailer": "^6.4.16",
     "saslprep": "^1.0.3"
   }
 }
