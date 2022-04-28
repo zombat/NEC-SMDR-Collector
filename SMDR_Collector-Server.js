@@ -387,7 +387,7 @@ mongoClient.connect(() => {
 		if(server.listening){
 		} else {
 			if(process.env.SMDR_MUX_ENABLED == `true`){
-				server.listen(60010, `10.4.0.150`);
+				server.listen(60010, process.env.SMDR_MUX_LISTEN_ADDRESS);
 			}
 		}
 		if(clientSession == undefined){
