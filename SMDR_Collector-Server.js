@@ -93,7 +93,7 @@ mongoClient.connect(() => {
 					} else {
 						console.log(`Created Directory: ./Logs`);
 						if(process.env.VERBOSE_LOG){
-							logFile(theDate(`dateTime`) + `\t:\tCreated Directory: ./Logs`, theDate(`date`) + `.log`);
+							helperFunctions.logFile(theDate(`dateTime`) + `\t:\tCreated Directory: ./Logs`, theDate(`date`) + `.log`);
 						}	
 					}
 				});
